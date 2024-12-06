@@ -4,6 +4,8 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'widgets/score_counter.dart';
+
 enum QuestionDisplayState {
   EMPTY,
   SHOW_CLUE1,
@@ -60,8 +62,8 @@ class QuestionTitleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var question_state = context.watch<QuestionState>();
-    var textTheme = Theme.of(context).textTheme;
-    var colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING),
       child: Row(children: [
@@ -93,8 +95,9 @@ class QuestionTitleWidget extends StatelessWidget {
             ],
           ),
         ),
+        Spacer(flex: 1),
         Expanded(
-          flex: 1,
+          flex: 2,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -103,15 +106,22 @@ class QuestionTitleWidget extends StatelessWidget {
                   question_state.doRevealClue1();
                 },
                 icon: Icon(Icons.favorite),
+                iconSize: QUESTION_DISPLAY_PADDING,
+                padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
               ),
               IconButton.filledTonal(
                 onPressed: () {
                   question_state.doRevealClue2();
                 },
                 icon: Icon(Icons.favorite),
+                iconSize: QUESTION_DISPLAY_PADDING,
+                padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
               ),
             ],
           ),
+        ),
+        Container(
+          child: ScoreCounter(stepValue: 5),
         ),
       ]),
     );
@@ -174,13 +184,13 @@ class ClueScoreText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var question_state = context.watch<QuestionState>();
-    var score_text = switch (question_state.getDisplayState()) {
-      QuestionDisplayState.EMPTY => "-",
+    final score_text = switch (question_state.getDisplayState()) {
+      QuestionDisplayState.EMPTY => "- -",
       QuestionDisplayState.SHOW_CLUE1 => "${CLUE1_SCORES[columnIndex]} points",
       QuestionDisplayState.SHOW_CLUE2 => "${CLUE2_SCORES[columnIndex]} points",
     };
 
-    var theme = Theme.of(context);
+    final theme = Theme.of(context);
     return AutoSizeText(score_text,
         maxLines: 1,
         minFontSize: theme.textTheme.headlineSmall?.fontSize ?? 12,
@@ -210,7 +220,7 @@ class _ClueDisplayWidgetState extends State<ClueDisplayWidget> {
     return Container(
       margin: const EdgeInsets.all(CLUE_DISPLAY_PADDING),
       child: LayoutBuilder(builder: (context, constraints) {
-        var maxIconSize = min(constraints.maxHeight, constraints.maxWidth);
+        final maxIconSize = min(constraints.maxHeight, constraints.maxWidth);
         return Stack(
           alignment: Alignment.centerLeft,
           fit: StackFit.expand,
@@ -241,7 +251,7 @@ class ClueButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
+    final theme = Theme.of(context);
     return FilledButton(
       onPressed: () {},
       child: AutoSizeText("${this.index}",
@@ -272,13 +282,13 @@ class ClueTextWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var question_state = context.watch<QuestionState>();
-    var clue_text = switch (question_state.getDisplayState()) {
+    final clue_text = switch (question_state.getDisplayState()) {
       QuestionDisplayState.EMPTY => "",
       QuestionDisplayState.SHOW_CLUE1 => "Clue ${this.index} Hint 1. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
       QuestionDisplayState.SHOW_CLUE2 => "Clue ${this.index} Hint 2. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     };
 
-    var theme = Theme.of(context);
+    final theme = Theme.of(context);
     return
         // AnimatedSwitcher(
         //   duration: Duration(milliseconds: 200),
@@ -309,7 +319,7 @@ class ClueTextWidget extends StatelessWidget {
   //     child: widget,
   //     builder: (context, widget) {
   //       final isUnder = false;
-  //       var tilt = ((animation.value - 0.5).abs() - 0.5) * 0.003;
+  //       final tilt = ((animation.value - 0.5).abs() - 0.5) * 0.003;
   //       tilt *= isUnder ? -1.0 : 1.0;
   //       final value =
   //           isUnder ? min(rotateAnim.value, pi / 2) : rotateAnim.value;
