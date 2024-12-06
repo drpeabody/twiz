@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'question.dart';
+import 'categories.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey, dynamicSchemeVariant: DynamicSchemeVariant.vibrant),
         // useMaterial3: true,
       ),
-      home: Scaffold(body: QuestionDisplayWidget()),
+      home: Scaffold(body: Categories()),
     );
   }
 }
