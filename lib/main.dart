@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, dynamicSchemeVariant: DynamicSchemeVariant.vibrant),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey, dynamicSchemeVariant: DynamicSchemeVariant.vibrant),
         // useMaterial3: true,
       ),
       home: Scaffold(body: QuestionDisplayWidget()),

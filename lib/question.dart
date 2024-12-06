@@ -4,7 +4,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'widgets/score_counter.dart';
+import 'widgets/scoreboard.dart';
 
 enum QuestionDisplayState {
   EMPTY,
@@ -68,7 +68,32 @@ class QuestionTitleWidget extends StatelessWidget {
       padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING),
       child: Row(children: [
         Expanded(
-          flex: 19,
+          flex: 2,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton.filledTonal(
+                onPressed: () {
+                  question_state.doRevealClue1();
+                },
+                icon: Icon(Icons.favorite),
+                iconSize: QUESTION_DISPLAY_PADDING,
+                padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
+              ),
+              IconButton.filledTonal(
+                onPressed: () {
+                  question_state.doRevealClue2();
+                },
+                icon: Icon(Icons.favorite),
+                iconSize: QUESTION_DISPLAY_PADDING,
+                padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
+              ),
+            ],
+          ),
+        ),
+        Spacer(flex: 1),
+        Expanded(
+          flex: 38,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -97,31 +122,8 @@ class QuestionTitleWidget extends StatelessWidget {
         ),
         Spacer(flex: 1),
         Expanded(
-          flex: 2,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              IconButton.filledTonal(
-                onPressed: () {
-                  question_state.doRevealClue1();
-                },
-                icon: Icon(Icons.favorite),
-                iconSize: QUESTION_DISPLAY_PADDING,
-                padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
-              ),
-              IconButton.filledTonal(
-                onPressed: () {
-                  question_state.doRevealClue2();
-                },
-                icon: Icon(Icons.favorite),
-                iconSize: QUESTION_DISPLAY_PADDING,
-                padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          child: ScoreCounter(stepValue: 5),
+          flex: 10,
+          child: ScoreBoard.Scoreboard(),
         ),
       ]),
     );
@@ -258,8 +260,8 @@ class ClueButtonWidget extends StatelessWidget {
           maxLines: 1,
           textScaleFactor: 1.6,
           minFontSize: theme.textTheme.headlineSmall?.fontSize ?? 12,
-          style: theme.textTheme.headlineLarge?.copyWith(
-              color: theme.colorScheme.onPrimaryContainer),
+          style: theme.textTheme.headlineLarge
+              ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
           overflow: TextOverflow.visible),
       style: FilledButton.styleFrom(
           textStyle: theme.textTheme.headlineLarge
@@ -284,8 +286,10 @@ class ClueTextWidget extends StatelessWidget {
     var question_state = context.watch<QuestionState>();
     final clue_text = switch (question_state.getDisplayState()) {
       QuestionDisplayState.EMPTY => "",
-      QuestionDisplayState.SHOW_CLUE1 => "Clue ${this.index} Hint 1. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      QuestionDisplayState.SHOW_CLUE2 => "Clue ${this.index} Hint 2. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      QuestionDisplayState.SHOW_CLUE1 =>
+        "Clue ${this.index} Hint 1. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      QuestionDisplayState.SHOW_CLUE2 =>
+        "Clue ${this.index} Hint 2. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     };
 
     final theme = Theme.of(context);
@@ -298,7 +302,9 @@ class ClueTextWidget extends StatelessWidget {
         //   switchOutCurve: Curves.easeInBack.flipped,
         //   child:
         Container(
-      padding: EdgeInsets.only(left: iconPadding + 2 * CLUE_DISPLAY_PADDING, right: CLUE_DISPLAY_PADDING),
+      padding: EdgeInsets.only(
+          left: iconPadding + 2 * CLUE_DISPLAY_PADDING,
+          right: CLUE_DISPLAY_PADDING),
       alignment: Alignment.centerLeft,
       decoration: _clueButtonDecoration(theme.colorScheme),
       child: AutoSizeText(clue_text,
