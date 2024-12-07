@@ -20,12 +20,12 @@ class _CategoriesState extends ChangeNotifier {
     CategoryConfig(title: "Science", status: CategoryStatus.HIDDEN),
     CategoryConfig(title: "Art", status: CategoryStatus.HIDDEN),
     CategoryConfig(title: "History", status: CategoryStatus.HIDDEN),
-    CategoryConfig(title: "Category 4", status: CategoryStatus.HIDDEN),
+    CategoryConfig(title: "Pop Music", status: CategoryStatus.HIDDEN),
     CategoryConfig(title: "Science2", status: CategoryStatus.HIDDEN),
     CategoryConfig(title: "Art2", status: CategoryStatus.HIDDEN),
     CategoryConfig(title: "History2", status: CategoryStatus.HIDDEN),
-    CategoryConfig(title: "Category 8", status: CategoryStatus.HIDDEN),
-    CategoryConfig(title: "Category 9", status: CategoryStatus.HIDDEN),
+    CategoryConfig(title: "Culture", status: CategoryStatus.HIDDEN),
+    CategoryConfig(title: "Television", status: CategoryStatus.HIDDEN),
   ];
 
   String? getCategoryTitle(int index) {
@@ -71,37 +71,26 @@ class CategoriesBoard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var state = context.watch<_CategoriesState>();
+    var categoriesState = context.watch<_CategoriesState>();
 
     var hiddenCategoriesList = <Widget>[];
     var revealedCategoriesList = <Widget>[];
     var exhaustedCategoriesList = <Widget>[];
 
-    for (final (index, config) in state.categoriesList.indexed) {
+    for (final (index, config) in categoriesState.categoriesList.indexed) {
       final statusList = switch (config.status) {
         CategoryStatus.HIDDEN => hiddenCategoriesList,
         CategoryStatus.REVEALED => revealedCategoriesList,
         CategoryStatus.EXHAUSTED => exhaustedCategoriesList,
       };
-      final isDisabled = config == CategoryStatus.EXHAUSTED;
       statusList.add(
         Flexible(
           key: ValueKey(("${config.title}-${config.status}")),
           child: LocalHero(
             tag: config.title,
-            flightShuttleBuilder: (context, animation, child) {
-              // TODO: Figure out how to make this work. Suggestion: https://stackoverflow.com/a/69470439
-              // var state = context.watch<_CategoriesState>();
-              child = child as CategoriesWidget;
-              int index = child.index;
-              print(
-                  "Child name: ${child.title} and index: ${index + 1} should be called ${state.getCategoryTitle(index)}");
-              return child;
-            },
-            child: CategoriesWidget(
-              index: index,
-              title: state.getCategoryTitle(index)!,
-              onPressed: isDisabled ? null : () => state.doStatusUpdate(index),
+            child: ChangeNotifierProvider.value(
+                value: categoriesState,
+                child: _CategoriesWidget(index: index)
             ),
           ),
         ),
@@ -161,36 +150,30 @@ class CategoriesBoard extends StatelessWidget {
 
 typedef OnPressedHandler = void Function();
 
-class CategoriesWidget extends StatefulWidget {
-  String title;
+class _CategoriesWidget extends StatelessWidget {
   final int index;
-  final OnPressedHandler? onPressed;
 
-  CategoriesWidget(
-      {required this.title,
-      required this.index,
-      this.onPressed,
-      Key? super.key});
+  _CategoriesWidget({required this.index, Key? super.key});
 
-  @override
-  State<CategoriesWidget> createState() => _CategoriesWidgetState();
-}
-
-class _CategoriesWidgetState extends State<CategoriesWidget> {
   @override
   Widget build(BuildContext context) {
     // TODO: Figure out how to make this work. Suggestion: https://stackoverflow.com/a/69470439
-    // var state = context.watch<_CategoriesState>();
-    print(
-        "Index: ${this.widget.index + 1}; current title: ${this.widget.title} Build function called");
+    var state = context.watch<_CategoriesState>();
+    var titleString = state.getCategoryTitle(this.index)!;
+    print("Index: ${this.index + 1}; current title: ${titleString} Build function called");
+
     return Container(
-      child: Center(
-        child: FilledButton.tonal(
-          child: Text(this.widget.title,
-              style: Theme.of(context).textTheme.headlineLarge),
-          onPressed: this.widget.onPressed,
+        child: Center(
+            child: FilledButton.tonal(
+                child: Text(
+                    titleString,
+                    style: Theme.of(context).textTheme.headlineLarge
+                ),
+                onPressed: state.getCategoryStatus(this.index) == CategoryStatus.EXHAUSTED 
+                    ? null 
+                    : () => state.doStatusUpdate(this.index),
+            ),
         ),
-      ),
     );
   }
 }
