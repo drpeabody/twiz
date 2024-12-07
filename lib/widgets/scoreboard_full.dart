@@ -1,7 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class ScoreCounter extends StatefulWidget {
-  const ScoreCounter({
+import '../global_state.dart';
+
+/// Widget that displays the full scoreboard
+class ScoreBoardFullWidget extends StatelessWidget {
+  const ScoreBoardFullWidget({Key? super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1800,
+      height: 900,
+      padding: const EdgeInsets.all(40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildScoreCounter(context, 0),
+              _buildScoreCounter(context, 1),
+              _buildScoreCounter(context, 2),
+            ],
+          ),
+          Spacer(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildScoreCounter(context, 3),
+              _buildScoreCounter(context, 4),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScoreCounter(BuildContext context, int idx) {
+    final scoreboardState = context.watch<GlobalScoreboard>();
+    final config = ScoreboardConfig[idx];
+    return _ScoreCounter(
+        name: config.$2,
+        stepValue: 5,
+        colorScheme: config.$1,
+        onChanged: (value) => scoreboardState.updateScore(idx, value));
+  }
+}
+
+class _ScoreCounter extends StatefulWidget {
+  const _ScoreCounter({
     super.key,
     required this.name,
     this.initialValue = 0,
@@ -57,7 +105,7 @@ class _ScoreCounterSizes {
       : EdgeInsets.symmetric(horizontal: scale * 20.0);
 }
 
-class _ScoreCounterState extends State<ScoreCounter>
+class _ScoreCounterState extends State<_ScoreCounter>
     with SingleTickerProviderStateMixin {
   late int _value;
   bool _increased = false;

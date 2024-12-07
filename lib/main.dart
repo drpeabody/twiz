@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:twiz/global_state.dart';
 
 import 'question.dart';
 import 'categories.dart';
@@ -16,10 +18,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey, dynamicSchemeVariant: DynamicSchemeVariant.vibrant),
-        // useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blueGrey,
+            dynamicSchemeVariant: DynamicSchemeVariant.vibrant),
       ),
-      home: Scaffold(body: Categories()),
+      home: Scaffold(
+        body: ChangeNotifierProvider(
+          create: (_) => GlobalScoreboard(),
+          child: QuestionDisplayWidget(),
+        ),
+      ),
     );
   }
 }

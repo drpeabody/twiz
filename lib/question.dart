@@ -4,7 +4,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'widgets/scoreboard.dart';
+import 'widgets/scoreboard_mini.dart';
 
 enum QuestionDisplayState {
   EMPTY,
@@ -123,7 +123,7 @@ class QuestionTitleWidget extends StatelessWidget {
         Spacer(flex: 1),
         Expanded(
           flex: 10,
-          child: ScoreBoard.Scoreboard(),
+          child: ScoreBoardMiniWidget.Scoreboard(),
         ),
       ]),
     );
