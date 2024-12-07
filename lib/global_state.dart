@@ -34,3 +34,6 @@ class GlobalScoreboard extends ChangeNotifier {
     return this._scores[index];
   }
 }
+
+const CLUE1_SCORES = [20, 30, 40];
+const CLUE2_SCORES = [10, 15, 20];

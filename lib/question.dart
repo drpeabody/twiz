@@ -1,9 +1,11 @@
 import 'dart:math';
 
+import 'package:animated_switcher_transitions/animated_switcher_transitions.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'global_state.dart';
 import 'widgets/scoreboard_mini.dart';
 
 enum QuestionDisplayState {
@@ -172,9 +174,6 @@ ShapeDecoration _clueButtonDecoration(ColorScheme colorScheme) {
   );
 }
 
-const CLUE1_SCORES = [20, 30, 40];
-const CLUE2_SCORES = [10, 15, 20];
-
 class ClueScoreText extends StatelessWidget {
   const ClueScoreText({super.key, required this.columnIndex});
 
@@ -192,8 +191,8 @@ class ClueScoreText extends StatelessWidget {
     final theme = Theme.of(context);
     return AutoSizeText(score_text,
         maxLines: 1,
-        minFontSize: theme.textTheme.headlineSmall?.fontSize ?? 12,
-        style: theme.textTheme.headlineLarge?.copyWith(
+        minFontSize: theme.textTheme.headlineMedium?.fontSize ?? 12,
+        style: theme.textTheme.displayMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: theme.colorScheme.onPrimaryContainer),
         overflow: TextOverflow.ellipsis);
@@ -212,14 +211,12 @@ class ClueDisplayWidget extends StatefulWidget {
 }
 
 class _ClueDisplayWidgetState extends State<ClueDisplayWidget> {
-  var answer_shown = false;
-
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(CLUE_DISPLAY_PADDING),
       child: LayoutBuilder(builder: (context, constraints) {
-        final maxIconSize = min(constraints.maxHeight, constraints.maxWidth);
+        final maxButtonSize = min(constraints.maxHeight, constraints.maxWidth);
         return Stack(
           alignment: Alignment.centerLeft,
           fit: StackFit.expand,
@@ -227,13 +224,16 @@ class _ClueDisplayWidgetState extends State<ClueDisplayWidget> {
             Positioned(
               width: constraints.maxWidth,
               height: constraints.maxHeight,
-              child:
-                  ClueTextWidget(index: widget.index, iconPadding: maxIconSize),
+              child: ClueTextWidget(
+                  index: widget.index, iconPadding: maxButtonSize),
             ),
             Positioned(
-              width: maxIconSize,
-              height: maxIconSize,
-              child: ClueButtonWidget(index: widget.index, size: maxIconSize),
+              left: 0,
+              top: 0,
+              child: ClueAnswerButtonWidget(
+                  index: widget.index,
+                  maxButtonSize: maxButtonSize,
+                  maxSize: constraints.biggest),
             ),
           ],
         );
@@ -242,18 +242,43 @@ class _ClueDisplayWidgetState extends State<ClueDisplayWidget> {
   }
 }
 
-class ClueButtonWidget extends StatelessWidget {
-  const ClueButtonWidget({super.key, required this.index, required this.size});
+class ClueAnswerButtonWidget extends StatefulWidget {
+  const ClueAnswerButtonWidget(
+      {super.key,
+      required this.index,
+      required this.maxButtonSize,
+      required this.maxSize});
 
   final int index;
-  final double size;
+  final double maxButtonSize;
+  final Size maxSize;
+
+  @override
+  State<ClueAnswerButtonWidget> createState() => _ClueAnswerButtonWidgetState();
+}
+
+class _ClueAnswerButtonWidgetState extends State<ClueAnswerButtonWidget> {
+  var answer_shown = false;
 
   @override
   Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: 200),
+      transitionBuilder: AnimatedSwitcherTransitions.slideRight,
+      layoutBuilder: AnimatedSwitcherLayouts.inOut,
+      child: answer_shown
+          ? _buildAnswerOverlay(context)
+          : _buildAnswerButton(context),
+    );
+  }
+
+  Widget _buildAnswerButton(BuildContext context) {
     final theme = Theme.of(context);
     return FilledButton(
-      onPressed: () {},
-      child: AutoSizeText("${this.index}",
+      onPressed: () => setState(() {
+        answer_shown = true;
+      }),
+      child: AutoSizeText("${this.widget.index}",
           maxLines: 1,
           textScaleFactor: 1.6,
           minFontSize: theme.textTheme.headlineSmall?.fontSize ?? 12,
@@ -263,10 +288,31 @@ class ClueButtonWidget extends StatelessWidget {
       style: FilledButton.styleFrom(
           textStyle: theme.textTheme.headlineLarge
               ?.copyWith(color: theme.colorScheme.onInverseSurface),
-          fixedSize: Size.square(this.size),
+          fixedSize: Size.square(this.widget.maxButtonSize),
           backgroundColor: theme.colorScheme.inversePrimary,
-          elevation: 0,
+          elevation: 2,
           shape: const CircleBorder()),
+    );
+  }
+
+  Widget _buildAnswerOverlay(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(CLUE_DISPLAY_PADDING),
+      width: this.widget.maxSize.width,
+      height: this.widget.maxSize.height,
+      alignment: Alignment.center,
+      decoration: ShapeDecoration(
+        shape: StadiumBorder(),
+        color: theme.colorScheme.primary,
+        shadows: kElevationToShadow[4],
+      ),
+      child: AutoSizeText("This is the answer",
+          maxLines: 3,
+          minFontSize: theme.textTheme.headlineMedium?.fontSize ?? 12,
+          style: theme.textTheme.displayMedium
+              ?.copyWith(color: theme.colorScheme.onPrimary),
+          overflow: TextOverflow.ellipsis),
     );
   }
 }
@@ -290,48 +336,26 @@ class ClueTextWidget extends StatelessWidget {
     };
 
     final theme = Theme.of(context);
-    return
-        // AnimatedSwitcher(
-        //   duration: Duration(milliseconds: 200),
-        //   transitionBuilder: __transitionBuilder,
-        //   layoutBuilder: (widget, list) => Stack(children: [widget!, ...list]),
-        //   switchInCurve: Curves.easeInBack,
-        //   switchOutCurve: Curves.easeInBack.flipped,
-        //   child:
-        Container(
-      padding: EdgeInsets.only(
-          left: iconPadding + 2 * CLUE_DISPLAY_PADDING,
-          right: CLUE_DISPLAY_PADDING),
-      alignment: Alignment.centerLeft,
-      decoration: _clueButtonDecoration(theme.colorScheme),
-      child: AutoSizeText(clue_text,
-          maxLines: 3,
-          key: ValueKey(question_state.getDisplayState()),
-          minFontSize: theme.textTheme.headlineSmall?.fontSize ?? 12,
-          style: theme.textTheme.headlineLarge
-              ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
-          overflow: TextOverflow.ellipsis),
-      // ),
+    return ClipPath(
+      clipper: ShapeBorderClipper(shape: StadiumBorder()),
+      child: Container(
+        padding: EdgeInsets.only(
+            left: iconPadding + 2 * CLUE_DISPLAY_PADDING,
+            right: CLUE_DISPLAY_PADDING),
+        alignment: Alignment.centerLeft,
+        color: theme.colorScheme.primaryContainer,
+        child: AnimatedSwitcher(
+          duration: Duration(milliseconds: 800),
+          transitionBuilder: AnimatedSwitcherTransitions.slideBottom,
+          child: AutoSizeText(clue_text,
+              maxLines: 3,
+              key: ValueKey((index, question_state.getDisplayState())),
+              minFontSize: theme.textTheme.headlineSmall?.fontSize ?? 12,
+              style: theme.textTheme.headlineLarge
+                  ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
+              overflow: TextOverflow.ellipsis),
+        ),
+      ),
     );
   }
-
-  // Widget __transitionBuilder(Widget widget, Animation<double> animation) {
-  //   final rotateAnim = Tween(begin: pi, end: 0.0).animate(animation);
-  //   return AnimatedBuilder(
-  //     animation: rotateAnim,
-  //     child: widget,
-  //     builder: (context, widget) {
-  //       final isUnder = false;
-  //       final tilt = ((animation.value - 0.5).abs() - 0.5) * 0.003;
-  //       tilt *= isUnder ? -1.0 : 1.0;
-  //       final value =
-  //           isUnder ? min(rotateAnim.value, pi / 2) : rotateAnim.value;
-  //       return Transform(
-  //         transform: Matrix4.rotationX(value)..setEntry(3, 0, tilt),
-  //         child: widget,
-  //         alignment: Alignment.center,
-  //       );
-  //     },
-  //   );
-  // }
 }
