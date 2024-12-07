@@ -15,18 +15,20 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blueGrey,
-            dynamicSchemeVariant: DynamicSchemeVariant.vibrant),
-      ),
-      home: Scaffold(
-        body: ChangeNotifierProvider(
-          create: (_) => GlobalScoreboard(),
-          child: QuestionDisplayWidget(),
+    return ChangeNotifierProvider(
+      create: (_) => GlobalScoreboard(),
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData.from(
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.blueGrey,
+              dynamicSchemeVariant: DynamicSchemeVariant.vibrant),
         ),
+        routes: {
+          CategoriesDisplayWidget.route: (context) => CategoriesDisplayWidget(),
+          QuestionDisplayWidget.route: (context) => QuestionDisplayWidget(),
+        },
+        initialRoute: CategoriesDisplayWidget.route,
       ),
     );
   }

@@ -37,20 +37,70 @@ class QuestionState extends ChangeNotifier {
 const QUESTION_DISPLAY_PADDING = 36.0;
 
 class QuestionDisplayWidget extends StatelessWidget {
+  static const route = "/question";
+
   const QuestionDisplayWidget();
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => QuestionState(),
-      child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Expanded(flex: 3, child: QuestionTitleWidget()),
-            Expanded(flex: 8, child: ClueGridWidget()),
-          ]),
-    );
+        create: (context) => QuestionState(),
+        builder: (context, _child) {
+          var question_state = context.watch<QuestionState>();
+          final textTheme = Theme.of(context).textTheme;
+          final colorScheme = Theme.of(context).colorScheme;
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Question Title here"),
+              titleTextStyle: textTheme.displayLarge!.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.w900,
+              ),
+              toolbarHeight: kToolbarHeight * 2,
+              elevation: 4,
+              leading: IconButton(
+                onPressed: () => Navigator.maybePop(context),
+                icon: Icon(Icons.arrow_back),
+                color: colorScheme.secondary,
+                iconSize: QUESTION_DISPLAY_PADDING * 1.5,
+                padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
+              ),
+              leadingWidth: QUESTION_DISPLAY_PADDING * 3,
+              actions: [
+                IconButton.filledTonal(
+                  onPressed: () {
+                    question_state.doRevealClue1();
+                  },
+                  icon: Icon(Icons.favorite_border),
+                  iconSize: QUESTION_DISPLAY_PADDING,
+                  padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
+                ),
+                SizedBox.square(dimension: QUESTION_DISPLAY_PADDING),
+                IconButton.filledTonal(
+                  onPressed: () {
+                    question_state.doRevealClue2();
+                  },
+                  icon: Icon(Icons.favorite),
+                  iconSize: QUESTION_DISPLAY_PADDING,
+                  padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
+                ),
+                SizedBox.square(dimension: QUESTION_DISPLAY_PADDING / 2),
+                ScoreBoardMiniWidget(
+                  padding: QUESTION_DISPLAY_PADDING,
+                ),
+                SizedBox.square(dimension: QUESTION_DISPLAY_PADDING / 2),
+              ],
+            ),
+            body: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(flex: 6, child: QuestionTitleWidget()),
+                  Expanded(flex: 17, child: ClueGridWidget()),
+                  Spacer(flex: 1),
+                ]),
+          );
+        });
   }
 }
 
@@ -61,71 +111,18 @@ class QuestionTitleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var question_state = context.watch<QuestionState>();
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
+      alignment: Alignment.center,
       padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING),
-      child: Row(children: [
-        Expanded(
-          flex: 2,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              IconButton.filledTonal(
-                onPressed: () {
-                  question_state.doRevealClue1();
-                },
-                icon: Icon(Icons.favorite),
-                iconSize: QUESTION_DISPLAY_PADDING,
-                padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
-              ),
-              IconButton.filledTonal(
-                onPressed: () {
-                  question_state.doRevealClue2();
-                },
-                icon: Icon(Icons.favorite),
-                iconSize: QUESTION_DISPLAY_PADDING,
-                padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
-              ),
-            ],
-          ),
-        ),
-        Spacer(flex: 1),
-        Expanded(
-          flex: 38,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                flex: 1,
-                child: AutoSizeText("Question Title here",
-                    maxLines: 1,
-                    minFontSize: textTheme.headlineLarge?.fontSize ?? 12,
-                    overflow: TextOverflow.fade,
-                    style: textTheme.displayLarge!
-                        .copyWith(color: colorScheme.primary)),
-              ),
-              Expanded(
-                flex: 2,
-                child: AutoSizeText(
-                    "Question description here. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                    maxLines: 3,
-                    minFontSize: textTheme.headlineLarge?.fontSize ?? 12,
-                    overflow: TextOverflow.ellipsis,
-                    style: textTheme.displayMedium!
-                        .copyWith(color: colorScheme.secondary)),
-              ),
-            ],
-          ),
-        ),
-        Spacer(flex: 1),
-        Expanded(
-          flex: 10,
-          child: ScoreBoardMiniWidget.Scoreboard(),
-        ),
-      ]),
+      child: AutoSizeText(
+          "Question description here. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+          maxLines: 3,
+          minFontSize: textTheme.headlineLarge?.fontSize ?? 12,
+          overflow: TextOverflow.ellipsis,
+          style:
+              textTheme.displayMedium!.copyWith(color: colorScheme.secondary)),
     );
   }
 }
