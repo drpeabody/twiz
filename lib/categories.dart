@@ -69,6 +69,24 @@ class Categories extends StatelessWidget {
 class CategoriesBoard extends StatelessWidget {
   CategoriesBoard({Key? super.key});
 
+    Widget makeCategorySection(BuildContext context, List<Widget> widgetList, String sectionTitle) {
+        return Column(
+            children: <Widget>[
+                Text(sectionTitle, style: Theme.of(context).textTheme.headlineLarge?.apply(
+                        fontSizeFactor: 1.2,
+                        heightDelta: 3.0,
+                        fontWeightDelta: 300,
+                        color: Theme.of(context).colorScheme.onSurface
+                    )
+                ),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: widgetList
+                )
+            ]
+        );
+    }
+
   @override
   Widget build(BuildContext context) {
     var categoriesState = context.watch<_CategoriesState>();
@@ -110,11 +128,9 @@ class CategoriesBoard extends StatelessWidget {
                 decoration: ShapeDecoration(
                   shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(20))),
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surfaceContainerLow,
                 ),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: hiddenCategoriesList)),
+                child: makeCategorySection(context, hiddenCategoriesList, "Hidden Categories")),
           ),
           Spacer(),
           Expanded(
@@ -123,11 +139,9 @@ class CategoriesBoard extends StatelessWidget {
                 decoration: ShapeDecoration(
                   shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(20))),
-                  color: Colors.blue,
+                  color: Theme.of(context).colorScheme.surfaceContainer,
                 ),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: revealedCategoriesList)),
+                child: makeCategorySection(context, revealedCategoriesList, "Revealed Categories")),
           ),
           Spacer(),
           Expanded(
@@ -136,11 +150,9 @@ class CategoriesBoard extends StatelessWidget {
                 decoration: ShapeDecoration(
                   shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(20))),
-                  color: Colors.blueGrey,
+                  color: Theme.of(context).colorScheme.surfaceContainerHigh,
                 ),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: exhaustedCategoriesList)),
+                child: makeCategorySection(context, exhaustedCategoriesList, "Exhausted Categories")),
           ),
         ],
       ),
@@ -164,15 +176,24 @@ class _CategoriesWidget extends StatelessWidget {
 
     return Container(
         child: Center(
-            child: FilledButton.tonal(
-                child: Text(
-                    titleString,
-                    style: Theme.of(context).textTheme.headlineLarge
+            child: Padding(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                child: FilledButton.tonal(
+                    child: Padding(
+                        padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                        child: Text(
+                            titleString,
+                            style: Theme.of(context).textTheme.headlineLarge?.apply(
+                                fontSizeFactor: 2.0
+                            ),
+                            textAlign: TextAlign.center
+                        )
+                    ),
+                    onPressed: state.getCategoryStatus(this.index) == CategoryStatus.EXHAUSTED 
+                        ? null 
+                        : () => state.doStatusUpdate(this.index),
                 ),
-                onPressed: state.getCategoryStatus(this.index) == CategoryStatus.EXHAUSTED 
-                    ? null 
-                    : () => state.doStatusUpdate(this.index),
-            ),
+            )
         ),
     );
   }
