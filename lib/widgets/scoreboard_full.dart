@@ -43,6 +43,7 @@ class ScoreBoardFullWidget extends StatelessWidget {
     return _ScoreCounter(
         name: config.$2,
         stepValue: 5,
+        initialValue: scoreboardState.getScore(idx),
         colorScheme: config.$1,
         onChanged: (value) => scoreboardState.updateScore(idx, value));
   }

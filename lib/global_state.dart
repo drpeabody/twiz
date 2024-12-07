@@ -30,7 +30,7 @@ class GlobalScoreboard extends ChangeNotifier {
     notifyListeners();
   }
 
-    int getScore(int index) {
+  int getScore(int index) {
     return this._scores[index];
   }
 }
