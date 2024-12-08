@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:local_hero/local_hero.dart';
 import 'package:provider/provider.dart';
@@ -17,26 +18,6 @@ class _CategoriesState extends ChangeNotifier {
       : categoriesList = List.filled(count, _CategoryStatus.HIDDEN);
 
   final List<_CategoryStatus> categoriesList;
-  // = [
-  //   _CategoryConfig(title: "Science", status: _CategoryStatus.HIDDEN),
-  //   _CategoryConfig(title: "Art", status: _CategoryStatus.HIDDEN),
-  //   _CategoryConfig(title: "History", status: _CategoryStatus.HIDDEN),
-  //   _CategoryConfig(title: "Pop Music", status: _CategoryStatus.HIDDEN),
-  //   _CategoryConfig(title: "Science2", status: _CategoryStatus.HIDDEN),
-  //   _CategoryConfig(title: "Art2", status: _CategoryStatus.HIDDEN),
-  //   _CategoryConfig(title: "History2", status: _CategoryStatus.HIDDEN),
-  //   _CategoryConfig(title: "Culture", status: _CategoryStatus.HIDDEN),
-  //   _CategoryConfig(title: "Television", status: _CategoryStatus.HIDDEN),
-  // ];
-
-  // String? getCategoryTitle(int index) {
-  //   final config = categoriesList[index];
-  //   if (config.status == _CategoryStatus.HIDDEN) {
-  //     return "Category ${index + 1}";
-  //   } else {
-  //     return config.title;
-  //   }
-  // }
 
   _CategoryStatus? getCategoryStatus(int index) {
     return categoriesList[index];
@@ -47,7 +28,7 @@ class _CategoriesState extends ChangeNotifier {
       return _CategoryStatus.EXHAUSTED;
     }
 
-    _CategoryStatus newStatus = switch (categoriesList[index]) {
+    var newStatus = switch (categoriesList[index]) {
       _CategoryStatus.HIDDEN => _CategoryStatus.REVEALED,
       _CategoryStatus.REVEALED => _CategoryStatus.EXHAUSTED,
       _CategoryStatus.EXHAUSTED => _CategoryStatus.EXHAUSTED,
@@ -64,20 +45,17 @@ class CategoriesDisplayWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categoriesData = CategoriesData.sample();
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-            create: (context) =>
-                _CategoriesState(count: categoriesData.getCount())),
-        Provider.value(value: categoriesData)
-      ],
+    final categoriesData = context.watch<GlobalData>().categories;
+    return ChangeNotifierProvider.value(
+      value: _CategoriesState(count: categoriesData.getCount()),
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
           toolbarHeight: kToolbarHeight * 2,
           elevation: 4,
           actions: [
+            _DataLoaderIcon(),
+            SizedBox.square(dimension: 36),
             ScoreBoardMiniWidget(
               padding: 36.0,
             ),
@@ -85,6 +63,66 @@ class CategoriesDisplayWidget extends StatelessWidget {
         ),
         body: _CategoriesBoard(),
       ),
+    );
+  }
+}
+
+class _DataLoaderIcon extends StatefulWidget {
+  const _DataLoaderIcon({super.key});
+
+  @override
+  State<_DataLoaderIcon> createState() => _DataLoaderIconState();
+}
+
+class _DataLoaderIconState extends State<_DataLoaderIcon> {
+  late Future<void> dataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+
+    dataFuture = Future.sync(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: dataFuture,
+        builder: (context, snapshot) {
+          final globalData = context.watch<GlobalData>();
+          if (snapshot.hasError) {
+            print("Dataset loading Error: ${snapshot.error}");
+            return _buildIconButton(context, child: Icon(Icons.report));
+          } else if (snapshot.connectionState == ConnectionState.done) {
+            return _buildIconButton(
+              context,
+              child: Icon(Icons.refresh),
+              onPressed: () => setState(() {
+                this.dataFuture = globalData
+                    .readJson(DefaultAssetBundle.of(context))
+                    .then((_) =>
+                        Future.delayed(Duration(milliseconds: 1000), () {}));
+              }),
+            );
+          } else {
+            return _buildIconButton(context,
+                child: CircularProgressIndicator(strokeWidth: 6));
+          }
+        });
+  }
+
+  Widget _buildIconButton(
+    BuildContext context, {
+    required Widget child,
+    OnPressedHandler? onPressed,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return IconButton(
+      onPressed: onPressed,
+      icon: child,
+      color: colorScheme.secondary,
+      iconSize: QUESTION_DISPLAY_PADDING * 1.5,
+      padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
     );
   }
 }
@@ -113,7 +151,7 @@ class _CategoriesBoard extends StatelessWidget {
           alignment: Alignment.center,
           widthFactor: 1,
           heightFactor: 1,
-          key: ValueKey(("${categoryName}-${status}")),
+          key: ValueKey((categoriesData.hashCode, categoryName, status)),
           child: LocalHero(
             tag: categoryName,
             child: MultiProvider(
@@ -180,16 +218,19 @@ class _CategoriesBoard extends StatelessWidget {
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Expanded(flex: 2, child:
         Center(
-          child: Text(
+          child: AutoSizeText(
             sectionTitle,
+            textScaleFactor: 1.2,
             style: Theme.of(context).textTheme.headlineLarge?.apply(
-                fontSizeFactor: 1.2,
                 heightDelta: 3.0,
                 fontWeightDelta: 300,
                 color: Theme.of(context).colorScheme.onPrimaryFixedVariant),
           ),
         ),
+        // ),
+        // Expanded(flex: 2, child:
         Wrap(
           direction: Axis.horizontal,
           alignment: WrapAlignment.center,
@@ -198,6 +239,7 @@ class _CategoriesBoard extends StatelessWidget {
           runSpacing: 20,
           children: widgetList,
         ),
+        // ),
       ],
     );
   }
@@ -237,7 +279,7 @@ class _CategoriesWidget extends StatelessWidget {
       child: FilledButton(
         child: Padding(
           padding: const EdgeInsets.all(20),
-          child: Text(titleString,
+          child: AutoSizeText(titleString,
               style: theme.textTheme.headlineLarge
                   ?.apply(fontSizeFactor: 2.0, color: textColor),
               textAlign: TextAlign.center),
@@ -254,9 +296,11 @@ class _CategoriesWidget extends StatelessWidget {
     final newStatus = state.doStatusUpdate(this.index);
     if (newStatus == _CategoryStatus.EXHAUSTED) {
       final navigator = Navigator.of(context);
-      final questionData = context.read<CategoriesData>().getCategoryQuestion(this.index);
+      final questionData =
+          context.read<CategoriesData>().getCategoryQuestion(this.index);
       Future.delayed(Duration(milliseconds: 600), () {
-        navigator.pushNamed(QuestionDisplayWidget.route, arguments: questionData);
+        navigator.pushNamed(QuestionDisplayWidget.route,
+            arguments: questionData);
       });
     }
   }

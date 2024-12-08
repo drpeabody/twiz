@@ -55,7 +55,7 @@ class QuestionDisplayWidget extends StatelessWidget {
 
   Widget _buildSubtree(BuildContext context, _child) {
     var questionState = context.watch<QuestionState>();
-    var questionData = context.read<QuestionData>();
+    var questionData = context.watch<QuestionData>();
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
@@ -119,11 +119,11 @@ class QuestionTitleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var questionData = context.read<QuestionData>();
+    var questionData = context.watch<QuestionData>();
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      alignment: Alignment.center,
+      alignment: Alignment.lerp(Alignment.centerLeft, Alignment.topLeft, 0.5),
       padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING),
       child: AutoSizeText(questionData.description,
           maxLines: 3,
@@ -158,7 +158,7 @@ class ClueGridWidget extends StatelessWidget {
   }
 
   Widget buildClueGridWidget(BuildContext context, int index) {
-    var questionData = context.read<QuestionData>();
+    var questionData = context.watch<QuestionData>();
     if (index < 3) {
       return _ClueScoreDisplayWidget(columnIndex: index);
     } else {
@@ -277,14 +277,14 @@ class _ClueAnswerButtonWidgetState extends State<ClueAnswerButtonWidget> {
   }
 
   Widget _buildAnswerButton(BuildContext context) {
-    final clueData = context.read<ClueData>();
+    final clueData = context.watch<ClueData>();
     final theme = Theme.of(context);
     final colorScheme = CLUE_COLORS[this.widget.index ~/ 5];
     return FilledButton(
       onPressed: () => setState(() {
         answer_shown = true;
       }),
-      child: AutoSizeText(clueData.idxPrompt,
+      child: AutoSizeText(clueData.prompt,
           maxLines: 1,
           textScaleFactor: 1.6,
           minFontSize: theme.textTheme.headlineSmall?.fontSize ?? 12,
@@ -302,7 +302,7 @@ class _ClueAnswerButtonWidgetState extends State<ClueAnswerButtonWidget> {
   }
 
   Widget _buildAnswerOverlay(BuildContext context) {
-    final clueData = context.read<ClueData>();
+    final clueData = context.watch<ClueData>();
     final theme = Theme.of(context);
     final colorScheme = CLUE_COLORS[this.widget.index ~/ 5];
     return Container(
@@ -334,7 +334,7 @@ class ClueTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final clueData = context.read<ClueData>();
+    final clueData = context.watch<ClueData>();
     var question_state = context.watch<QuestionState>();
     final clue_text = switch (question_state.getDisplayState()) {
       QuestionDisplayState.EMPTY => "",

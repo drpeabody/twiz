@@ -1,6 +1,10 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'global_state.g.dart';
 
 const ScoreboardLength = 5;
 
@@ -51,8 +55,22 @@ class GlobalScoreboard extends ChangeNotifier {
   }
 }
 
+class GlobalData extends ChangeNotifier {
+  CategoriesData categories = CategoriesData.sample();
+
+  Future<void> readJson(AssetBundle rootBundle) async {
+    print("Loading data from 'assets/dataset.json'");
+    final String response = await rootBundle.loadString('dataset.json');
+    final jsonData = await json.decode(response);
+    categories = CategoriesData.fromJson(jsonData);
+    notifyListeners();
+  }
+}
+
 @immutable
 class CategoriesData {
+  CategoriesData._private(this.categories);
+
   CategoriesData.sample({int count = 10, int? seed})
       : categories = List.generate(count, (idx) {
           final random = Random(seed);
@@ -67,6 +85,12 @@ class CategoriesData {
                   "${QuestionData.SampleDescription}");
           return (categoryName, question);
         });
+
+  factory CategoriesData.fromJson(Map<String, dynamic> json) =>
+      CategoriesData._private(json.entries
+          .map((entry) => (entry.key, QuestionData.fromJson(entry.value)))
+          .toList());
+
   static const SampleCategories = [
     "Science",
     "Art",
@@ -96,7 +120,10 @@ class CategoriesData {
 }
 
 @immutable
+@JsonSerializable(explicitToJson: true)
 class QuestionData {
+  const QuestionData(this.title, this.description, this.clues);
+
   QuestionData.sample({String? title, String? description})
       : title = title ?? "Question Title here",
         description = description ?? SampleDescription,
@@ -112,12 +139,20 @@ class QuestionData {
   final String description;
 
   final List<ClueData> clues;
+
+  factory QuestionData.fromJson(Map<String, dynamic> json) =>
+      _$QuestionDataFromJson(json);
+
+  Map<String, dynamic> toJson() => _$QuestionDataToJson(this);
 }
 
 @immutable
+@JsonSerializable()
 class ClueData {
+  const ClueData(this.prompt, this.hint1, this.hint2, this.answer);
+
   const ClueData.sample(idx)
-      : idxPrompt = "${idx}",
+      : prompt = "${idx}",
         hint1 = "Clue ${idx} Hint 1: ${SampleHint}",
         hint2 = "Clue ${idx} Hint 2: ${SampleHint}",
         answer = "This is the answer ${idx}";
@@ -125,8 +160,13 @@ class ClueData {
   static const SampleHint =
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
-  final String idxPrompt;
+  final String prompt;
   final String hint1;
   final String hint2;
   final String answer;
+
+  factory ClueData.fromJson(Map<String, dynamic> json) =>
+      _$ClueDataFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ClueDataToJson(this);
 }

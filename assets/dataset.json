@@ -1,0 +1,98 @@
+{
+    "test-category": {
+        "title": "This is a title",
+        "description": "Foobar",
+        "clues": [
+            {
+                "prompt": "01",
+                "hint1": "Hint 1",
+                "hint2": "Hint 2",
+                "answer": "answer"
+            },
+            {
+                "prompt": "02",
+                "hint1": "Hint 1",
+                "hint2": "Hint 2",
+                "answer": "answer"
+            },
+            {
+                "prompt": "03",
+                "hint1": "Hint 1",
+                "hint2": "Hint 2",
+                "answer": "answer"
+            },
+            {
+                "prompt": "04",
+                "hint1": "Hint 1",
+                "hint2": "Hint 2",
+                "answer": "answer"
+            },
+            {
+                "prompt": "05",
+                "hint1": "Hint 1",
+                "hint2": "Hint 2",
+                "answer": "answer"
+            },
+            {
+                "prompt": "06",
+                "hint1": "Hint 1",
+                "hint2": "Hint 2",
+                "answer": "answer"
+            },
+            {
+                "prompt": "07",
+                "hint1": "Hint 1",
+                "hint2": "Hint 2",
+                "answer": "answer"
+            },
+            {
+                "prompt": "08",
+                "hint1": "Hint 1",
+                "hint2": "Hint 2",
+                "answer": "answer"
+            },
+            {
+                "prompt": "09",
+                "hint1": "Hint 1",
+                "hint2": "Hint 2",
+                "answer": "answer"
+            },
+            {
+                "prompt": "10",
+                "hint1": "Hint 1",
+                "hint2": "Hint 2",
+                "answer": "answer"
+            },
+            {
+                "prompt": "11",
+                "hint1": "Hint 1",
+                "hint2": "Hint 2",
+                "answer": "answer"
+            },
+            {
+                "prompt": "12",
+                "hint1": "Hint 1",
+                "hint2": "Hint 2",
+                "answer": "answer"
+            },
+            {
+                "prompt": "13",
+                "hint1": "Hint 1",
+                "hint2": "Hint 2",
+                "answer": "answer"
+            },
+            {
+                "prompt": "14",
+                "hint1": "Hint 1",
+                "hint2": "Hint 2",
+                "answer": "answer"
+            },
+            {
+                "prompt": "15",
+                "hint1": "Hint 1",
+                "hint2": "Hint 2",
+                "answer": "answer"
+            }
+        ]
+    }
+}

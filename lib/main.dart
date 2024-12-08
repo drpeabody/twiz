@@ -15,8 +15,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => GlobalScoreboard(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => GlobalScoreboard()),
+        ChangeNotifierProvider(create: (_) => GlobalData()),
+      ],
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData.from(
@@ -25,7 +28,11 @@ class MyApp extends StatelessWidget {
               dynamicSchemeVariant: DynamicSchemeVariant.vibrant),
         ),
         routes: {
-          CategoriesDisplayWidget.route: (context) => CategoriesDisplayWidget(),
+          CategoriesDisplayWidget.route: (context) =>
+              ProxyProvider<GlobalData, CategoriesData>(
+                  update: (_, globalData, _prevCategoriesData) =>
+                      globalData.categories,
+                  child: CategoriesDisplayWidget()),
           QuestionDisplayWidget.route: (context) => QuestionDisplayWidget(),
         },
         initialRoute: CategoriesDisplayWidget.route,
