@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:local_hero/local_hero.dart';
 import 'package:provider/provider.dart';
+import 'package:twiz/global_state.dart';
 
 import 'question.dart';
 import 'widgets/scoreboard_mini.dart';
@@ -11,50 +12,47 @@ enum _CategoryStatus {
   EXHAUSTED,
 }
 
-class _CategoryConfig {
-  _CategoryConfig({required this.title, required this.status});
-
-  String title;
-  _CategoryStatus status;
-}
-
 class _CategoriesState extends ChangeNotifier {
-  List<_CategoryConfig> categoriesList = [
-    _CategoryConfig(title: "Science", status: _CategoryStatus.HIDDEN),
-    _CategoryConfig(title: "Art", status: _CategoryStatus.HIDDEN),
-    _CategoryConfig(title: "History", status: _CategoryStatus.HIDDEN),
-    _CategoryConfig(title: "Pop Music", status: _CategoryStatus.HIDDEN),
-    _CategoryConfig(title: "Science2", status: _CategoryStatus.HIDDEN),
-    _CategoryConfig(title: "Art2", status: _CategoryStatus.HIDDEN),
-    _CategoryConfig(title: "History2", status: _CategoryStatus.HIDDEN),
-    _CategoryConfig(title: "Culture", status: _CategoryStatus.HIDDEN),
-    _CategoryConfig(title: "Television", status: _CategoryStatus.HIDDEN),
-  ];
+  _CategoriesState({required int count})
+      : categoriesList = List.filled(count, _CategoryStatus.HIDDEN);
 
-  String? getCategoryTitle(int index) {
-    final config = categoriesList[index];
-    if (config.status == _CategoryStatus.HIDDEN) {
-      return "Category ${index + 1}";
-    } else {
-      return config.title;
-    }
-  }
+  final List<_CategoryStatus> categoriesList;
+  // = [
+  //   _CategoryConfig(title: "Science", status: _CategoryStatus.HIDDEN),
+  //   _CategoryConfig(title: "Art", status: _CategoryStatus.HIDDEN),
+  //   _CategoryConfig(title: "History", status: _CategoryStatus.HIDDEN),
+  //   _CategoryConfig(title: "Pop Music", status: _CategoryStatus.HIDDEN),
+  //   _CategoryConfig(title: "Science2", status: _CategoryStatus.HIDDEN),
+  //   _CategoryConfig(title: "Art2", status: _CategoryStatus.HIDDEN),
+  //   _CategoryConfig(title: "History2", status: _CategoryStatus.HIDDEN),
+  //   _CategoryConfig(title: "Culture", status: _CategoryStatus.HIDDEN),
+  //   _CategoryConfig(title: "Television", status: _CategoryStatus.HIDDEN),
+  // ];
+
+  // String? getCategoryTitle(int index) {
+  //   final config = categoriesList[index];
+  //   if (config.status == _CategoryStatus.HIDDEN) {
+  //     return "Category ${index + 1}";
+  //   } else {
+  //     return config.title;
+  //   }
+  // }
 
   _CategoryStatus? getCategoryStatus(int index) {
-    return categoriesList[index].status;
+    return categoriesList[index];
   }
 
   _CategoryStatus doStatusUpdate(int index) {
-    if (categoriesList[index].status == _CategoryStatus.EXHAUSTED) {
+    if (categoriesList[index] == _CategoryStatus.EXHAUSTED) {
       return _CategoryStatus.EXHAUSTED;
     }
 
-    _CategoryStatus newStatus = switch (categoriesList[index].status) {
+    _CategoryStatus newStatus = switch (categoriesList[index]) {
       _CategoryStatus.HIDDEN => _CategoryStatus.REVEALED,
       _CategoryStatus.REVEALED => _CategoryStatus.EXHAUSTED,
       _CategoryStatus.EXHAUSTED => _CategoryStatus.EXHAUSTED,
     };
-    categoriesList[index].status = newStatus;
+    categoriesList[index] = newStatus;
     notifyListeners();
 
     return newStatus;
@@ -66,8 +64,14 @@ class CategoriesDisplayWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => _CategoriesState(),
+    final categoriesData = CategoriesData.sample();
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+            create: (context) =>
+                _CategoriesState(count: categoriesData.getCount())),
+        Provider.value(value: categoriesData)
+      ],
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
@@ -91,13 +95,15 @@ class _CategoriesBoard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var categoriesState = context.watch<_CategoriesState>();
+    final categoriesData = context.read<CategoriesData>();
 
     var hiddenCategoriesList = <Widget>[];
     var revealedCategoriesList = <Widget>[];
     var exhaustedCategoriesList = <Widget>[];
 
-    for (final (index, config) in categoriesState.categoriesList.indexed) {
-      final statusList = switch (config.status) {
+    for (final (index, status) in categoriesState.categoriesList.indexed) {
+      final categoryName = categoriesData.getCategoryName(index);
+      final statusList = switch (status) {
         _CategoryStatus.HIDDEN => hiddenCategoriesList,
         _CategoryStatus.REVEALED => revealedCategoriesList,
         _CategoryStatus.EXHAUSTED => exhaustedCategoriesList,
@@ -107,11 +113,14 @@ class _CategoriesBoard extends StatelessWidget {
           alignment: Alignment.center,
           widthFactor: 1,
           heightFactor: 1,
-          key: ValueKey(("${config.title}-${config.status}")),
+          key: ValueKey(("${categoryName}-${status}")),
           child: LocalHero(
-            tag: config.title,
-            child: ChangeNotifierProvider.value(
-              value: categoriesState,
+            tag: categoryName,
+            child: MultiProvider(
+              providers: [
+                Provider.value(value: categoriesData),
+                ChangeNotifierProvider.value(value: categoriesState),
+              ],
               child: _CategoriesWidget(index: index),
             ),
           ),
@@ -204,8 +213,10 @@ class _CategoriesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var state = context.watch<_CategoriesState>();
-    final titleString = state.getCategoryTitle(this.index)!;
     final categoryStatus = state.getCategoryStatus(index);
+    final titleString = context.read<CategoriesData>().getCategoryName(
+        this.index,
+        hidden: categoryStatus == _CategoryStatus.HIDDEN);
 
     final theme = Theme.of(context);
     final (textColor, buttonColor) = switch (categoryStatus!) {
@@ -243,10 +254,9 @@ class _CategoriesWidget extends StatelessWidget {
     final newStatus = state.doStatusUpdate(this.index);
     if (newStatus == _CategoryStatus.EXHAUSTED) {
       final navigator = Navigator.of(context);
-      print("Scheduling the future");
+      final questionData = context.read<CategoriesData>().getCategoryQuestion(this.index);
       Future.delayed(Duration(milliseconds: 600), () {
-        print("Executing the future");
-        navigator.pushNamed(QuestionDisplayWidget.route);
+        navigator.pushNamed(QuestionDisplayWidget.route, arguments: questionData);
       });
     }
   }

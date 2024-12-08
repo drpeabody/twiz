@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 const ScoreboardLength = 5;
@@ -47,4 +49,84 @@ class GlobalScoreboard extends ChangeNotifier {
   String getTeamName(int index) {
     return this._names[index];
   }
+}
+
+@immutable
+class CategoriesData {
+  CategoriesData.sample({int count = 10, int? seed})
+      : categories = List.generate(count, (idx) {
+          final random = Random(seed);
+          final idx = random.nextInt(5);
+          final suffix = (random.nextInt(512).toRadixString(16))
+              .toUpperCase()
+              .padLeft(4, "0");
+          final categoryName = "${SampleCategories[idx]}-${suffix}";
+          final question = QuestionData.sample(
+              title: "Question Title ${idx}",
+              description: "More details about \"${categoryName}\". "
+                  "${QuestionData.SampleDescription}");
+          return (categoryName, question);
+        });
+  static const SampleCategories = [
+    "Science",
+    "Art",
+    "Pop Culture",
+    "This is a very long category",
+    "Business"
+  ];
+
+  final List<(String, QuestionData)> categories;
+
+  int getCount() {
+    return categories.length;
+  }
+
+  String getCategoryName(int index, {hidden = false}) {
+    final config = this.categories[index];
+    if (hidden) {
+      return "Category ${index + 1}";
+    } else {
+      return config.$1;
+    }
+  }
+
+  QuestionData getCategoryQuestion(int index) {
+    return this.categories[index].$2;
+  }
+}
+
+@immutable
+class QuestionData {
+  QuestionData.sample({String? title, String? description})
+      : title = title ?? "Question Title here",
+        description = description ?? SampleDescription,
+        clues = List.generate(15, ClueData.sample);
+
+  static const SampleDescription =
+      "Question description goes here. Lorem ipsum dolor sit amet, consectetur"
+      " adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore"
+      " magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation"
+      " ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+
+  final String title;
+  final String description;
+
+  final List<ClueData> clues;
+}
+
+@immutable
+class ClueData {
+  const ClueData.sample(idx)
+      : idxPrompt = "${idx}",
+        hint1 = "Clue ${idx} Hint 1: ${SampleHint}",
+        hint2 = "Clue ${idx} Hint 2: ${SampleHint}",
+        answer = "This is the answer ${idx}";
+
+  static const SampleHint =
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+
+  final String idxPrompt;
+  final String hint1;
+  final String hint2;
+  final String answer;
 }

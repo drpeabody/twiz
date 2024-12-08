@@ -39,70 +39,76 @@ class QuestionState extends ChangeNotifier {
 const QUESTION_DISPLAY_PADDING = 36.0;
 
 class QuestionDisplayWidget extends StatelessWidget {
-  static const route = "/question";
+  static const route = "/question"; 
 
   const QuestionDisplayWidget();
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-        create: (context) => QuestionState(),
-        builder: (context, _child) {
-          var question_state = context.watch<QuestionState>();
-          final textTheme = Theme.of(context).textTheme;
-          final colorScheme = Theme.of(context).colorScheme;
-          return Scaffold(
-            appBar: AppBar(
-              title: Text("Question Title here"),
-              titleTextStyle: textTheme.displayLarge!.copyWith(
-                color: colorScheme.primary,
-                fontWeight: FontWeight.w900,
-              ),
-              toolbarHeight: kToolbarHeight * 2,
-              elevation: 4,
-              leading: IconButton(
-                onPressed: () => Navigator.maybePop(context),
-                icon: Icon(Icons.arrow_back),
-                color: colorScheme.secondary,
-                iconSize: QUESTION_DISPLAY_PADDING * 1.5,
-                padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
-              ),
-              leadingWidth: QUESTION_DISPLAY_PADDING * 3,
-              actions: [
-                IconButton.filledTonal(
-                  onPressed: () {
-                    question_state.doRevealClue1();
-                  },
-                  icon: Icon(Icons.favorite_border),
-                  iconSize: QUESTION_DISPLAY_PADDING,
-                  padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
-                ),
-                SizedBox.square(dimension: QUESTION_DISPLAY_PADDING),
-                IconButton.filledTonal(
-                  onPressed: () {
-                    question_state.doRevealClue2();
-                  },
-                  icon: Icon(Icons.favorite),
-                  iconSize: QUESTION_DISPLAY_PADDING,
-                  padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
-                ),
-                SizedBox.square(dimension: QUESTION_DISPLAY_PADDING / 2),
-                ScoreBoardMiniWidget(
-                  padding: QUESTION_DISPLAY_PADDING,
-                ),
-                SizedBox.square(dimension: QUESTION_DISPLAY_PADDING / 2),
-              ],
-            ),
-            body: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(flex: 6, child: QuestionTitleWidget()),
-                  Expanded(flex: 17, child: ClueGridWidget()),
-                  Spacer(flex: 1),
-                ]),
-          );
-        });
+    final questionData = ModalRoute.of(context)!.settings.arguments as QuestionData?;
+
+    return MultiProvider(providers: [
+      ChangeNotifierProvider(create: (_) => QuestionState()),
+      Provider.value(value: questionData ?? QuestionData.sample()),
+    ], builder: _buildSubtree);
+  }
+
+  Widget _buildSubtree(BuildContext context, _child) {
+    var questionState = context.watch<QuestionState>();
+    var questionData = context.read<QuestionData>();
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(questionData.title),
+        titleTextStyle: textTheme.displayLarge!.copyWith(
+          color: colorScheme.primary,
+          fontWeight: FontWeight.w900,
+        ),
+        toolbarHeight: kToolbarHeight * 2,
+        elevation: 4,
+        leading: IconButton(
+          onPressed: () => Navigator.maybePop(context),
+          icon: Icon(Icons.arrow_back),
+          color: colorScheme.secondary,
+          iconSize: QUESTION_DISPLAY_PADDING * 1.5,
+          padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
+        ),
+        leadingWidth: QUESTION_DISPLAY_PADDING * 3,
+        actions: [
+          IconButton.filledTonal(
+            onPressed: () {
+              questionState.doRevealClue1();
+            },
+            icon: Icon(Icons.favorite_border),
+            iconSize: QUESTION_DISPLAY_PADDING,
+            padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
+          ),
+          SizedBox.square(dimension: QUESTION_DISPLAY_PADDING),
+          IconButton.filledTonal(
+            onPressed: () {
+              questionState.doRevealClue2();
+            },
+            icon: Icon(Icons.favorite),
+            iconSize: QUESTION_DISPLAY_PADDING,
+            padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
+          ),
+          SizedBox.square(dimension: QUESTION_DISPLAY_PADDING / 2),
+          ScoreBoardMiniWidget(
+            padding: QUESTION_DISPLAY_PADDING,
+          ),
+          SizedBox.square(dimension: QUESTION_DISPLAY_PADDING / 2),
+        ],
+      ),
+      body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Expanded(flex: 6, child: QuestionTitleWidget()),
+            Expanded(flex: 17, child: ClueGridWidget()),
+            Spacer(flex: 1),
+          ]),
+    );
   }
 }
 
@@ -113,13 +119,13 @@ class QuestionTitleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var questionData = context.read<QuestionData>();
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       alignment: Alignment.center,
       padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING),
-      child: AutoSizeText(
-          "Question description here. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      child: AutoSizeText(questionData.description,
           maxLines: 3,
           minFontSize: textTheme.headlineLarge?.fontSize ?? 12,
           overflow: TextOverflow.ellipsis,
@@ -152,12 +158,15 @@ class ClueGridWidget extends StatelessWidget {
   }
 
   Widget buildClueGridWidget(BuildContext context, int index) {
+    var questionData = context.read<QuestionData>();
     if (index < 3) {
-      return  _ClueScoreDisplayWidget(columnIndex: index);
+      return _ClueScoreDisplayWidget(columnIndex: index);
     } else {
       var clueIdx = index - 3;
       clueIdx = 5 * (clueIdx % 3) + (clueIdx ~/ 3);
-      return ClueDisplayWidget(index: clueIdx);
+      return Provider.value(
+          value: questionData.clues[clueIdx],
+          child: ClueDisplayWidget(index: clueIdx));
     }
   }
 }
@@ -169,9 +178,9 @@ class _ClueScoreDisplayWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var question_state = context.watch<QuestionState>();
-    final score_text = switch (question_state.getDisplayState()) {
-      QuestionDisplayState.EMPTY => "- -",
+    var questionState = context.watch<QuestionState>();
+    final score_text = switch (questionState.getDisplayState()) {
+      QuestionDisplayState.EMPTY => "---",
       QuestionDisplayState.SHOW_CLUE1 => "${CLUE1_SCORES[columnIndex]} points",
       QuestionDisplayState.SHOW_CLUE2 => "${CLUE2_SCORES[columnIndex]} points",
     };
@@ -179,17 +188,16 @@ class _ClueScoreDisplayWidget extends StatelessWidget {
     final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.all(12.0),
-        decoration: ShapeDecoration(
-          shape: StadiumBorder(),
-          color: CLUE_COLORS[this.columnIndex].primary,
-        ),
-        alignment: Alignment.center,
+      decoration: ShapeDecoration(
+        shape: StadiumBorder(),
+        color: CLUE_COLORS[this.columnIndex].primary,
+      ),
+      alignment: Alignment.center,
       child: AutoSizeText(score_text,
           maxLines: 1,
           minFontSize: theme.textTheme.headlineMedium?.fontSize ?? 12,
           style: theme.textTheme.displayMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onPrimary),
+              fontWeight: FontWeight.bold, color: theme.colorScheme.onPrimary),
           overflow: TextOverflow.ellipsis),
     );
   }
@@ -269,13 +277,14 @@ class _ClueAnswerButtonWidgetState extends State<ClueAnswerButtonWidget> {
   }
 
   Widget _buildAnswerButton(BuildContext context) {
+    final clueData = context.read<ClueData>();
     final theme = Theme.of(context);
     final colorScheme = CLUE_COLORS[this.widget.index ~/ 5];
     return FilledButton(
       onPressed: () => setState(() {
         answer_shown = true;
       }),
-      child: AutoSizeText("${this.widget.index}",
+      child: AutoSizeText(clueData.idxPrompt,
           maxLines: 1,
           textScaleFactor: 1.6,
           minFontSize: theme.textTheme.headlineSmall?.fontSize ?? 12,
@@ -293,6 +302,7 @@ class _ClueAnswerButtonWidgetState extends State<ClueAnswerButtonWidget> {
   }
 
   Widget _buildAnswerOverlay(BuildContext context) {
+    final clueData = context.read<ClueData>();
     final theme = Theme.of(context);
     final colorScheme = CLUE_COLORS[this.widget.index ~/ 5];
     return Container(
@@ -305,7 +315,7 @@ class _ClueAnswerButtonWidgetState extends State<ClueAnswerButtonWidget> {
         color: colorScheme.primary,
         shadows: kElevationToShadow[4],
       ),
-      child: AutoSizeText("This is the answer",
+      child: AutoSizeText(clueData.answer,
           maxLines: 3,
           minFontSize: theme.textTheme.headlineMedium?.fontSize ?? 12,
           style: theme.textTheme.displayMedium
@@ -324,13 +334,12 @@ class ClueTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final clueData = context.read<ClueData>();
     var question_state = context.watch<QuestionState>();
     final clue_text = switch (question_state.getDisplayState()) {
       QuestionDisplayState.EMPTY => "",
-      QuestionDisplayState.SHOW_CLUE1 =>
-        "Clue ${this.index} Hint 1. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      QuestionDisplayState.SHOW_CLUE2 =>
-        "Clue ${this.index} Hint 2. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      QuestionDisplayState.SHOW_CLUE1 => clueData.hint1,
+      QuestionDisplayState.SHOW_CLUE2 => clueData.hint2,
     };
 
     final theme = Theme.of(context);
