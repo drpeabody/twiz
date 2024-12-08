@@ -2,8 +2,9 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:local_hero/local_hero.dart';
 import 'package:provider/provider.dart';
-import 'package:twiz/global_state.dart';
 
+import 'display.dart';
+import 'global_state.dart';
 import 'question.dart';
 import 'widgets/scoreboard_mini.dart';
 
@@ -46,22 +47,23 @@ class CategoriesDisplayWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categoriesData = context.watch<GlobalData>().categories;
+
     return ChangeNotifierProvider.value(
       value: _CategoriesState(count: categoriesData.getCount()),
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          toolbarHeight: kToolbarHeight * 2,
-          elevation: 4,
-          actions: [
-            _DataLoaderIcon(),
-            SizedBox.square(dimension: 36),
-            ScoreBoardMiniWidget(
-              padding: 36.0,
-            ),
-          ],
+      builder: DisplayCharacterstics.wrapped(
+        child: Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            toolbarHeight: kToolbarHeight * 2,
+            elevation: 4,
+            actions: [
+              _DataLoaderIcon(),
+              SizedBox.square(dimension: 36),
+              ScoreBoardMiniWidget(),
+            ],
+          ),
+          body: _CategoriesBoard(),
         ),
-        body: _CategoriesBoard(),
       ),
     );
   }
@@ -116,13 +118,14 @@ class _DataLoaderIconState extends State<_DataLoaderIcon> {
     required Widget child,
     OnPressedHandler? onPressed,
   }) {
+    final displayCharacterstics = context.read<DisplayCharacterstics>();
     final colorScheme = Theme.of(context).colorScheme;
     return IconButton(
       onPressed: onPressed,
       icon: child,
       color: colorScheme.secondary,
-      iconSize: QUESTION_DISPLAY_PADDING * 1.5,
-      padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
+      iconSize: displayCharacterstics.iconSize * 1.5,
+      padding: displayCharacterstics.fullPadding / 2,
     );
   }
 }
@@ -134,6 +137,7 @@ class _CategoriesBoard extends StatelessWidget {
   Widget build(BuildContext context) {
     var categoriesState = context.watch<_CategoriesState>();
     final categoriesData = context.read<CategoriesData>();
+    final displayCharacterstics = context.read<DisplayCharacterstics>();
 
     var hiddenCategoriesList = <Widget>[];
     var revealedCategoriesList = <Widget>[];
@@ -158,6 +162,7 @@ class _CategoriesBoard extends StatelessWidget {
               providers: [
                 Provider.value(value: categoriesData),
                 ChangeNotifierProvider.value(value: categoriesState),
+                Provider.value(value: displayCharacterstics),
               ],
               child: _CategoriesWidget(index: index),
             ),
@@ -214,32 +219,31 @@ class _CategoriesBoard extends StatelessWidget {
 
   Widget _makeCategorySection(
       BuildContext context, List<Widget> widgetList, String sectionTitle) {
+    final displayCharacterstics = context.read<DisplayCharacterstics>();
     return Column(
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Expanded(flex: 2, child:
-        Center(
+        Align(
+          alignment: Alignment.center,
+          heightFactor: 1,
           child: AutoSizeText(
             sectionTitle,
-            textScaleFactor: 1.2,
+            textScaleFactor: 0.5 * displayCharacterstics.textScale,
             style: Theme.of(context).textTheme.headlineLarge?.apply(
                 heightDelta: 3.0,
                 fontWeightDelta: 300,
                 color: Theme.of(context).colorScheme.onPrimaryFixedVariant),
           ),
         ),
-        // ),
-        // Expanded(flex: 2, child:
         Wrap(
           direction: Axis.horizontal,
           alignment: WrapAlignment.center,
           runAlignment: WrapAlignment.center,
-          spacing: 20,
-          runSpacing: 20,
+          // spacing: displayCharacterstics.paddingRaw / 4,
+          runSpacing: displayCharacterstics.paddingRaw,
           children: widgetList,
         ),
-        // ),
       ],
     );
   }
@@ -272,16 +276,18 @@ class _CategoriesWidget extends StatelessWidget {
         ),
       _CategoryStatus.EXHAUSTED => (theme.colorScheme.surface, null),
     };
+    final displayCharacterstics = context.read<DisplayCharacterstics>();
 
     return Center(
-      widthFactor: 1.2,
-      heightFactor: 1.15,
+      widthFactor: 1.4,
+      heightFactor: 1.2,
       child: FilledButton(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: displayCharacterstics.fullPadding / 2,
           child: AutoSizeText(titleString,
-              style: theme.textTheme.headlineLarge
-                  ?.apply(fontSizeFactor: 2.0, color: textColor),
+              style: theme.textTheme.headlineLarge?.apply(
+                  fontSizeFactor: 0.75 * displayCharacterstics.textScale,
+                  color: textColor),
               textAlign: TextAlign.center),
         ),
         style: FilledButton.styleFrom(backgroundColor: buttonColor),

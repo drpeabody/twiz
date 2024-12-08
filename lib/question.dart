@@ -5,6 +5,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'display.dart';
 import 'global_state.dart';
 import 'widgets/scoreboard_mini.dart';
 
@@ -36,21 +37,23 @@ class QuestionState extends ChangeNotifier {
   }
 }
 
-const QUESTION_DISPLAY_PADDING = 36.0;
-
 class QuestionDisplayWidget extends StatelessWidget {
-  static const route = "/question"; 
+  static const route = "/question";
 
   const QuestionDisplayWidget();
 
   @override
   Widget build(BuildContext context) {
-    final questionData = ModalRoute.of(context)!.settings.arguments as QuestionData?;
+    final questionData =
+        ModalRoute.of(context)!.settings.arguments as QuestionData?;
 
-    return MultiProvider(providers: [
-      ChangeNotifierProvider(create: (_) => QuestionState()),
-      Provider.value(value: questionData ?? QuestionData.sample()),
-    ], builder: _buildSubtree);
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => QuestionState()),
+        Provider.value(value: questionData ?? QuestionData.sample()),
+      ],
+      builder: DisplayCharacterstics.wrapped(childBuilder: _buildSubtree),
+    );
   }
 
   Widget _buildSubtree(BuildContext context, _child) {
@@ -58,46 +61,46 @@ class QuestionDisplayWidget extends StatelessWidget {
     var questionData = context.watch<QuestionData>();
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    final displayCharacterstics = context.read<DisplayCharacterstics>();
     return Scaffold(
       appBar: AppBar(
-        title: Text(questionData.title),
-        titleTextStyle: textTheme.displayLarge!.copyWith(
+        title: Text(questionData.title,
+            textScaler: displayCharacterstics.compundedTextScaler(scale: 0.9)),
+        titleTextStyle: textTheme.displaySmall!.copyWith(
           color: colorScheme.primary,
           fontWeight: FontWeight.w900,
         ),
-        toolbarHeight: kToolbarHeight * 2,
+        toolbarHeight: displayCharacterstics.appBarHeight,
         elevation: 4,
         leading: IconButton(
           onPressed: () => Navigator.maybePop(context),
           icon: Icon(Icons.arrow_back),
           color: colorScheme.secondary,
-          iconSize: QUESTION_DISPLAY_PADDING * 1.5,
-          padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
+          iconSize: displayCharacterstics.iconSize * 1.5,
+          padding: displayCharacterstics.fullPadding / 2,
         ),
-        leadingWidth: QUESTION_DISPLAY_PADDING * 3,
+        leadingWidth: displayCharacterstics.paddingRaw * 3,
         actions: [
           IconButton.filledTonal(
             onPressed: () {
               questionState.doRevealClue1();
             },
-            icon: Icon(Icons.favorite_border),
-            iconSize: QUESTION_DISPLAY_PADDING,
-            padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
+            icon: Icon(Icons.visibility_outlined),
+            iconSize: displayCharacterstics.iconSize,
+            padding: displayCharacterstics.fullPadding / 2,
           ),
-          SizedBox.square(dimension: QUESTION_DISPLAY_PADDING),
+          displayCharacterstics.fullSpacer,
           IconButton.filledTonal(
             onPressed: () {
               questionState.doRevealClue2();
             },
-            icon: Icon(Icons.favorite),
-            iconSize: QUESTION_DISPLAY_PADDING,
-            padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING / 2),
+            icon: Icon(Icons.visibility),
+            iconSize: displayCharacterstics.iconSize,
+            padding: displayCharacterstics.fullPadding / 2,
           ),
-          SizedBox.square(dimension: QUESTION_DISPLAY_PADDING / 2),
-          ScoreBoardMiniWidget(
-            padding: QUESTION_DISPLAY_PADDING,
-          ),
-          SizedBox.square(dimension: QUESTION_DISPLAY_PADDING / 2),
+          displayCharacterstics.halfSpacer,
+          ScoreBoardMiniWidget(),
+          displayCharacterstics.halfSpacer,
         ],
       ),
       body: Column(
@@ -120,11 +123,12 @@ class QuestionTitleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var questionData = context.watch<QuestionData>();
+    final displayCharacterstics = context.read<DisplayCharacterstics>();
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       alignment: Alignment.lerp(Alignment.centerLeft, Alignment.topLeft, 0.5),
-      padding: EdgeInsets.all(QUESTION_DISPLAY_PADDING),
+      padding: displayCharacterstics.fullPadding,
       child: AutoSizeText(questionData.description,
           maxLines: 3,
           minFontSize: textTheme.headlineLarge?.fontSize ?? 12,
@@ -141,23 +145,24 @@ class ClueGridWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
+      final displayCharacterstics = context.read<DisplayCharacterstics>();
       return ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
         child: GridView.count(
           crossAxisCount: 3,
           physics: NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(8),
+          padding: displayCharacterstics.fullPadding / 2,
           childAspectRatio:
               (6.0 / 3.0) * (constraints.maxWidth / constraints.maxHeight),
           children: List.generate(
-              18, (idx) => buildClueGridWidget(context, idx),
+              18, (idx) => _buildClueGridWidget(context, idx),
               growable: false),
         ),
       );
     });
   }
 
-  Widget buildClueGridWidget(BuildContext context, int index) {
+  Widget _buildClueGridWidget(BuildContext context, int index) {
     var questionData = context.watch<QuestionData>();
     if (index < 3) {
       return _ClueScoreDisplayWidget(columnIndex: index);
@@ -203,7 +208,7 @@ class _ClueScoreDisplayWidget extends StatelessWidget {
   }
 }
 
-const CLUE_DISPLAY_PADDING = 12.0;
+// const CLUE_DISPLAY_PADDING = 12.0;
 
 class ClueDisplayWidget extends StatefulWidget {
   const ClueDisplayWidget({super.key, required this.index});
@@ -217,8 +222,9 @@ class ClueDisplayWidget extends StatefulWidget {
 class _ClueDisplayWidgetState extends State<ClueDisplayWidget> {
   @override
   Widget build(BuildContext context) {
+    final displayCharacterstics = context.read<DisplayCharacterstics>();
     return Container(
-      margin: const EdgeInsets.all(CLUE_DISPLAY_PADDING),
+      margin: displayCharacterstics.fullPadding / 2,
       child: LayoutBuilder(builder: (context, constraints) {
         final maxButtonSize = min(constraints.maxHeight, constraints.maxWidth);
         return Stack(
@@ -280,13 +286,14 @@ class _ClueAnswerButtonWidgetState extends State<ClueAnswerButtonWidget> {
     final clueData = context.watch<ClueData>();
     final theme = Theme.of(context);
     final colorScheme = CLUE_COLORS[this.widget.index ~/ 5];
+    final displayCharacterstics = context.read<DisplayCharacterstics>();
     return FilledButton(
       onPressed: () => setState(() {
         answer_shown = true;
       }),
       child: AutoSizeText(clueData.prompt,
           maxLines: 1,
-          textScaleFactor: 1.6,
+          textScaleFactor: displayCharacterstics.textScale,
           minFontSize: theme.textTheme.headlineSmall?.fontSize ?? 12,
           style: theme.textTheme.headlineLarge
               ?.copyWith(color: colorScheme.onPrimaryContainer),
@@ -305,8 +312,9 @@ class _ClueAnswerButtonWidgetState extends State<ClueAnswerButtonWidget> {
     final clueData = context.watch<ClueData>();
     final theme = Theme.of(context);
     final colorScheme = CLUE_COLORS[this.widget.index ~/ 5];
+    final displayCharacterstics = context.read<DisplayCharacterstics>();
     return Container(
-      padding: const EdgeInsets.all(CLUE_DISPLAY_PADDING),
+      padding: displayCharacterstics.fullPadding / 2,
       width: this.widget.maxSize.width,
       height: this.widget.maxSize.height,
       alignment: Alignment.center,
@@ -344,12 +352,13 @@ class ClueTextWidget extends StatelessWidget {
 
     final theme = Theme.of(context);
     final colorScheme = CLUE_COLORS[index ~/ 5];
+    final displayCharacterstics = context.read<DisplayCharacterstics>();
     return ClipPath(
       clipper: ShapeBorderClipper(shape: StadiumBorder()),
       child: Container(
         padding: EdgeInsets.only(
-            left: iconPadding + 2 * CLUE_DISPLAY_PADDING,
-            right: CLUE_DISPLAY_PADDING),
+            left: iconPadding + displayCharacterstics.paddingRaw / 2,
+            right: displayCharacterstics.paddingRaw / 2),
         alignment: Alignment.centerLeft,
         color: colorScheme.primaryContainer,
         child: AnimatedSwitcher(

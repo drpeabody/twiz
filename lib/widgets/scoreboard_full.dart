@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../display.dart';
 import '../global_state.dart';
 
 /// Widget that displays the full scoreboard
@@ -9,29 +10,23 @@ class ScoreBoardFullWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final displayCharacterstics = context.read<DisplayCharacterstics>();
     return Container(
-      width: 1800,
-      height: 900,
-      padding: const EdgeInsets.all(40),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      width: 900 * displayCharacterstics.textScale,
+      height: 450 * displayCharacterstics.textScale,
+      padding: displayCharacterstics.fullPadding * 2,
+      child: Wrap(
+        direction: Axis.horizontal,
+        alignment: WrapAlignment.center,
+        runAlignment: WrapAlignment.center,
+        spacing: displayCharacterstics.paddingRaw * 2,
+        runSpacing: displayCharacterstics.paddingRaw * 2,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildScoreCounter(context, 0),
-              _buildScoreCounter(context, 1),
-              _buildScoreCounter(context, 2),
-            ],
-          ),
-          Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildScoreCounter(context, 3),
-              _buildScoreCounter(context, 4),
-            ],
-          ),
+          _buildScoreCounter(context, 0),
+          _buildScoreCounter(context, 1),
+          _buildScoreCounter(context, 2),
+          _buildScoreCounter(context, 3),
+          _buildScoreCounter(context, 4),
         ],
       ),
     );
@@ -119,7 +114,9 @@ class _ScoreCounterState extends State<_ScoreCounter>
   void initState() {
     super.initState();
     _value = widget.initialValue;
-    _sizes = _ScoreCounterSizes(direction: widget.direction);
+    final scale = context.read<DisplayCharacterstics>().textScale;
+    _sizes =
+        _ScoreCounterSizes(direction: widget.direction, scale: 0.75 * scale);
 
     if (widget.direction == Axis.horizontal) {
       _inOffsetTween =
@@ -140,7 +137,8 @@ class _ScoreCounterState extends State<_ScoreCounter>
     var colorScheme = widget.colorScheme ?? Theme.of(context).colorScheme;
     return Container(
       decoration: ShapeDecoration(
-        shape: ContinuousRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(100))),
+        shape: ContinuousRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(100))),
         color: colorScheme.primary,
       ),
       padding: _sizes.containerPadding,

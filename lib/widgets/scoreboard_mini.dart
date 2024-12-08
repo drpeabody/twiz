@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../display.dart';
 import '../global_state.dart';
 import 'scoreboard_full.dart';
 
 class ScoreBoardMiniWidget extends StatelessWidget {
-  const ScoreBoardMiniWidget({required this.padding});
-
-  final double padding;
+  const ScoreBoardMiniWidget();
 
   @override
   Widget build(BuildContext context) {
     final scoreboardState = context.watch<GlobalScoreboard>();
+    var displayCharacterstics = context.read<DisplayCharacterstics>();
+    final padding = displayCharacterstics.paddingRaw;
+
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: this.padding / 2),
+      padding: displayCharacterstics.fullPadding / 2,
       child: TextButton(
         onPressed: () => showDialog<String>(
           context: context,
-          builder: (context) =>
-              _scorecardDialogBuilder(context, scoreboardState),
+          builder: (context) => _fullScoreboardDialogBuilder(
+              context, scoreboardState, displayCharacterstics),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.max,
@@ -56,22 +58,28 @@ class ScoreBoardMiniWidget extends StatelessWidget {
     );
   }
 
-  AlertDialog _scorecardDialogBuilder(
-      BuildContext context, GlobalScoreboard scoreboardState) {
+  AlertDialog _fullScoreboardDialogBuilder(
+      BuildContext context,
+      GlobalScoreboard scoreboardState,
+      DisplayCharacterstics displayCharacterstics) {
     final theme = Theme.of(context);
+
     return AlertDialog(
       title: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: displayCharacterstics.fullPadding / 2,
         child: Text(
-          'Scorecard',
+          'Scoreboard',
           style: theme.textTheme.displayLarge!.copyWith(
-              color: theme.colorScheme.primary,
-              fontSize: theme.textTheme.displayLarge!.fontSize! * 2),
+              color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
+          textScaler: displayCharacterstics.textScaler,
           textAlign: TextAlign.center,
         ),
       ),
-      content: ChangeNotifierProvider.value(
-        value: scoreboardState,
+      content: MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: scoreboardState),
+          Provider.value(value: displayCharacterstics),
+        ],
         child: ScoreBoardFullWidget(),
       ),
     );
