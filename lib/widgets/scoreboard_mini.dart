@@ -38,10 +38,11 @@ class ScoreBoardMiniWidget extends StatelessWidget {
   Widget _buildScoreTile(BuildContext context, int idx) {
     final scoreboardState = context.watch<GlobalScoreboard>();
     final theme = Theme.of(context);
+    final scoreboardTeamColorScheme = scoreboardState.getColorScheme(idx);
     return Container(
       decoration: ShapeDecoration(
         shape: const CircleBorder(),
-        color: ScoreboardConfig[idx].$1.primary,
+        color: scoreboardTeamColorScheme.primary,
       ),
       padding: const EdgeInsets.all(10),
       alignment: Alignment.center,
@@ -50,7 +51,7 @@ class ScoreBoardMiniWidget extends StatelessWidget {
         scoreboardState.getScore(idx).toString(),
         style: theme.textTheme.headlineSmall!.copyWith(
             fontWeight: FontWeight.bold,
-            color: ScoreboardConfig[idx].$1.onPrimary),
+            color: scoreboardTeamColorScheme.onPrimary),
       ),
     );
   }

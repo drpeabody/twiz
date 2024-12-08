@@ -153,12 +153,7 @@ class ClueGridWidget extends StatelessWidget {
 
   Widget buildClueGridWidget(BuildContext context, int index) {
     if (index < 3) {
-      return Container(
-        margin: const EdgeInsets.all(12.0),
-        decoration: _clueButtonDecoration(Theme.of(context).colorScheme),
-        alignment: Alignment.center,
-        child: ClueScoreText(columnIndex: index),
-      );
+      return  _ClueScoreDisplayWidget(columnIndex: index);
     } else {
       var clueIdx = index - 3;
       clueIdx = 5 * (clueIdx % 3) + (clueIdx ~/ 3);
@@ -167,15 +162,8 @@ class ClueGridWidget extends StatelessWidget {
   }
 }
 
-ShapeDecoration _clueButtonDecoration(ColorScheme colorScheme) {
-  return ShapeDecoration(
-    shape: StadiumBorder(),
-    color: colorScheme.primaryContainer,
-  );
-}
-
-class ClueScoreText extends StatelessWidget {
-  const ClueScoreText({super.key, required this.columnIndex});
+class _ClueScoreDisplayWidget extends StatelessWidget {
+  const _ClueScoreDisplayWidget({super.key, required this.columnIndex});
 
   final int columnIndex;
 
@@ -189,13 +177,21 @@ class ClueScoreText extends StatelessWidget {
     };
 
     final theme = Theme.of(context);
-    return AutoSizeText(score_text,
-        maxLines: 1,
-        minFontSize: theme.textTheme.headlineMedium?.fontSize ?? 12,
-        style: theme.textTheme.displayMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onPrimaryContainer),
-        overflow: TextOverflow.ellipsis);
+    return Container(
+      margin: const EdgeInsets.all(12.0),
+        decoration: ShapeDecoration(
+          shape: StadiumBorder(),
+          color: CLUE_COLORS[this.columnIndex].primary,
+        ),
+        alignment: Alignment.center,
+      child: AutoSizeText(score_text,
+          maxLines: 1,
+          minFontSize: theme.textTheme.headlineMedium?.fontSize ?? 12,
+          style: theme.textTheme.displayMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onPrimary),
+          overflow: TextOverflow.ellipsis),
+    );
   }
 }
 
@@ -274,6 +270,7 @@ class _ClueAnswerButtonWidgetState extends State<ClueAnswerButtonWidget> {
 
   Widget _buildAnswerButton(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = CLUE_COLORS[this.widget.index ~/ 5];
     return FilledButton(
       onPressed: () => setState(() {
         answer_shown = true;
@@ -283,13 +280,13 @@ class _ClueAnswerButtonWidgetState extends State<ClueAnswerButtonWidget> {
           textScaleFactor: 1.6,
           minFontSize: theme.textTheme.headlineSmall?.fontSize ?? 12,
           style: theme.textTheme.headlineLarge
-              ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
+              ?.copyWith(color: colorScheme.onPrimaryContainer),
           overflow: TextOverflow.visible),
       style: FilledButton.styleFrom(
           textStyle: theme.textTheme.headlineLarge
               ?.copyWith(color: theme.colorScheme.onInverseSurface),
           fixedSize: Size.square(this.widget.maxButtonSize),
-          backgroundColor: theme.colorScheme.inversePrimary,
+          backgroundColor: colorScheme.inversePrimary,
           elevation: 2,
           shape: const CircleBorder()),
     );
@@ -297,6 +294,7 @@ class _ClueAnswerButtonWidgetState extends State<ClueAnswerButtonWidget> {
 
   Widget _buildAnswerOverlay(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = CLUE_COLORS[this.widget.index ~/ 5];
     return Container(
       padding: const EdgeInsets.all(CLUE_DISPLAY_PADDING),
       width: this.widget.maxSize.width,
@@ -304,14 +302,14 @@ class _ClueAnswerButtonWidgetState extends State<ClueAnswerButtonWidget> {
       alignment: Alignment.center,
       decoration: ShapeDecoration(
         shape: StadiumBorder(),
-        color: theme.colorScheme.primary,
+        color: colorScheme.primary,
         shadows: kElevationToShadow[4],
       ),
       child: AutoSizeText("This is the answer",
           maxLines: 3,
           minFontSize: theme.textTheme.headlineMedium?.fontSize ?? 12,
           style: theme.textTheme.displayMedium
-              ?.copyWith(color: theme.colorScheme.onPrimary),
+              ?.copyWith(color: colorScheme.onPrimary),
           overflow: TextOverflow.ellipsis),
     );
   }
@@ -336,6 +334,7 @@ class ClueTextWidget extends StatelessWidget {
     };
 
     final theme = Theme.of(context);
+    final colorScheme = CLUE_COLORS[index ~/ 5];
     return ClipPath(
       clipper: ShapeBorderClipper(shape: StadiumBorder()),
       child: Container(
@@ -343,7 +342,7 @@ class ClueTextWidget extends StatelessWidget {
             left: iconPadding + 2 * CLUE_DISPLAY_PADDING,
             right: CLUE_DISPLAY_PADDING),
         alignment: Alignment.centerLeft,
-        color: theme.colorScheme.primaryContainer,
+        color: colorScheme.primaryContainer,
         child: AnimatedSwitcher(
           duration: Duration(milliseconds: 800),
           transitionBuilder: AnimatedSwitcherTransitions.slideBottom,
@@ -352,7 +351,7 @@ class ClueTextWidget extends StatelessWidget {
               key: ValueKey((index, question_state.getDisplayState())),
               minFontSize: theme.textTheme.headlineSmall?.fontSize ?? 12,
               style: theme.textTheme.headlineLarge
-                  ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
+                  ?.copyWith(color: colorScheme.onPrimaryContainer),
               overflow: TextOverflow.ellipsis),
         ),
       ),

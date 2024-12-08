@@ -39,12 +39,11 @@ class ScoreBoardFullWidget extends StatelessWidget {
 
   Widget _buildScoreCounter(BuildContext context, int idx) {
     final scoreboardState = context.watch<GlobalScoreboard>();
-    final config = ScoreboardConfig[idx];
     return _ScoreCounter(
-        name: config.$2,
+        name: scoreboardState.getTeamName(idx),
         stepValue: 5,
         initialValue: scoreboardState.getScore(idx),
-        colorScheme: config.$1,
+        colorScheme: scoreboardState.getColorScheme(idx),
         onChanged: (value) => scoreboardState.updateScore(idx, value));
   }
 }

@@ -70,7 +70,7 @@ class CategoriesDisplayWidget extends StatelessWidget {
       create: (context) => _CategoriesState(),
       child: Scaffold(
         appBar: AppBar(
-          leading: null,
+          automaticallyImplyLeading: false,
           toolbarHeight: kToolbarHeight * 2,
           elevation: 4,
           actions: [
@@ -123,8 +123,7 @@ class _CategoriesBoard extends StatelessWidget {
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOut,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
             flex: 10,
