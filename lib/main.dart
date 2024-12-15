@@ -6,11 +6,11 @@ import 'pages/question.dart';
 import 'pages/categories.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const GameApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class GameApp extends StatelessWidget {
+  const GameApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => GlobalData()),
       ],
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Twiz Flutter',
         theme: ThemeData.from(
           colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.blueGrey,
