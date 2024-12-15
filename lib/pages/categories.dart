@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:local_hero/local_hero.dart';
 import 'package:provider/provider.dart';
 
-import 'display.dart';
-import 'global_state.dart';
+import '../display.dart';
+import '../global_state.dart';
 import 'question.dart';
-import 'widgets/scoreboard_mini.dart';
+import '../widgets/scoreboard_mini.dart';
 
 enum _CategoryStatus {
   HIDDEN,

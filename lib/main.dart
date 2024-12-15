@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:twiz/global_state.dart';
 
-import 'question.dart';
-import 'categories.dart';
+import 'pages/question.dart';
+import 'pages/categories.dart';
 
 void main() {
   runApp(const MyApp());

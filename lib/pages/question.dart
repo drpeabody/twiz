@@ -5,9 +5,9 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'display.dart';
-import 'global_state.dart';
-import 'widgets/scoreboard_mini.dart';
+import '../display.dart';
+import '../global_state.dart';
+import '../widgets/scoreboard_mini.dart';
 
 enum QuestionDisplayState {
   EMPTY,
