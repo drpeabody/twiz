@@ -12,9 +12,8 @@ class ScoreBoardMiniWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final scoreboardState = context.watch<GlobalScoreboard>();
     var displayCharacterstics = context.read<DisplayCharacterstics>();
-    final padding = displayCharacterstics.paddingRaw;
 
-    return Padding(
+    return Container(
       padding: displayCharacterstics.fullPadding / 2,
       child: TextButton(
         onPressed: () => showDialog<String>(
@@ -23,21 +22,29 @@ class ScoreBoardMiniWidget extends StatelessWidget {
               context, scoreboardState, displayCharacterstics),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.max,
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: List.generate((ScoreboardLength * 2 + 1), (int index) {
-            if (index % 2 == 0) {
-              return SizedBox.square(dimension: padding / 4);
+          children: List.generate((ScoreboardLength * 2 - 1), (int index) {
+            if (index % 2 != 0) {
+              return SizedBox.fromSize(
+                  size: Size.fromWidth(displayCharacterstics.paddingRaw / 4));
             } else {
-              return _buildScoreTile(context, index ~/ 2);
+              return _buildScoreTile(
+                  context, index ~/ 2, displayCharacterstics);
             }
-          }),
+          }, growable: false),
         ),
+        style: TextButton.styleFrom(
+            padding: EdgeInsets.symmetric(
+                vertical: displayCharacterstics.paddingRaw / 2,
+                horizontal: displayCharacterstics.paddingRaw / 4)),
       ),
     );
   }
 
-  Widget _buildScoreTile(BuildContext context, int idx) {
+  Widget _buildScoreTile(BuildContext context, int idx,
+      DisplayCharacterstics displayCharacterstics) {
     final scoreboardState = context.watch<GlobalScoreboard>();
     final theme = Theme.of(context);
     final scoreboardTeamColorScheme = scoreboardState.getColorScheme(idx);
@@ -46,42 +53,51 @@ class ScoreBoardMiniWidget extends StatelessWidget {
         shape: const CircleBorder(),
         color: scoreboardTeamColorScheme.primary,
       ),
-      padding: const EdgeInsets.all(10),
       alignment: Alignment.center,
-      constraints: BoxConstraints(minWidth: 60, minHeight: 60),
+      constraints: BoxConstraints(
+          maxHeight: displayCharacterstics.iconSize * 2.5,
+          maxWidth: displayCharacterstics.iconSize * 2.5),
       child: Text(
         scoreboardState.getScore(idx).toString(),
-        style: theme.textTheme.headlineSmall!.copyWith(
+        style: theme.textTheme.titleLarge!.copyWith(
             fontWeight: FontWeight.bold,
             color: scoreboardTeamColorScheme.onPrimary),
+        textScaler: displayCharacterstics.textScaler,
       ),
     );
   }
 
-  AlertDialog _fullScoreboardDialogBuilder(
+  Widget _fullScoreboardDialogBuilder(
       BuildContext context,
       GlobalScoreboard scoreboardState,
       DisplayCharacterstics displayCharacterstics) {
     final theme = Theme.of(context);
+    final size = MediaQuery.sizeOf(context);
 
-    return AlertDialog(
-      title: Padding(
-        padding: displayCharacterstics.fullPadding / 2,
-        child: Text(
-          'Scoreboard',
-          style: theme.textTheme.displayLarge!.copyWith(
-              color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
-          textScaler: displayCharacterstics.textScaler,
-          textAlign: TextAlign.center,
-        ),
-      ),
-      content: MultiProvider(
-        providers: [
-          ChangeNotifierProvider.value(value: scoreboardState),
-          Provider.value(value: displayCharacterstics),
-        ],
-        child: ScoreBoardFullWidget(),
-      ),
+    final scoreboardWidget = MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: scoreboardState),
+        Provider.value(value: displayCharacterstics),
+      ],
+      child: ScoreBoardFullWidget(),
     );
+
+    if (size.width < 1000) {
+      return Dialog.fullscreen(child: scoreboardWidget);
+    } else {
+      return AlertDialog(
+        title: Padding(
+          padding: displayCharacterstics.fullPadding / 2,
+          child: Text(
+            'Scoreboard',
+            style: theme.textTheme.displayLarge!.copyWith(
+                color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
+            textScaler: displayCharacterstics.textScaler,
+            textAlign: TextAlign.center,
+          ),
+        ),
+        content: scoreboardWidget,
+      );
+    }
   }
 }

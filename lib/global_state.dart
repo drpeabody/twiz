@@ -152,7 +152,7 @@ class ClueData {
   const ClueData(this.prompt, this.hint1, this.hint2, this.answer);
 
   const ClueData.sample(idx)
-      : prompt = "${idx}",
+      : prompt = "10${idx}",
         hint1 = "Clue ${idx} Hint 1: ${SampleHint}",
         hint2 = "Clue ${idx} Hint 2: ${SampleHint}",
         answer = "This is the answer ${idx}";

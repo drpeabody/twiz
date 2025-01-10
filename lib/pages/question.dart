@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:animated_switcher_transitions/animated_switcher_transitions.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -65,7 +64,7 @@ class QuestionDisplayWidget extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(questionData.title,
-            textScaler: displayCharacterstics.compundedTextScaler(scale: 0.9)),
+            textScaler: displayCharacterstics.compundedTextScaler(scale: 1.1)),
         titleTextStyle: textTheme.displaySmall!.copyWith(
           color: colorScheme.primary,
           fontWeight: FontWeight.w900,
@@ -77,7 +76,7 @@ class QuestionDisplayWidget extends StatelessWidget {
           icon: Icon(Icons.arrow_back),
           color: colorScheme.secondary,
           iconSize: displayCharacterstics.iconSize * 1.5,
-          padding: displayCharacterstics.fullPadding / 2,
+          padding: displayCharacterstics.fullPadding / 2.5,
         ),
         leadingWidth: displayCharacterstics.paddingRaw * 3,
         actions: [
@@ -129,12 +128,12 @@ class QuestionTitleWidget extends StatelessWidget {
     return Container(
       alignment: Alignment.lerp(Alignment.centerLeft, Alignment.topLeft, 0.5),
       padding: displayCharacterstics.fullPadding,
-      child: AutoSizeText(questionData.description,
+      child: Text(questionData.description,
           maxLines: 3,
-          minFontSize: textTheme.headlineLarge?.fontSize ?? 12,
           overflow: TextOverflow.ellipsis,
           style:
-              textTheme.displayMedium!.copyWith(color: colorScheme.secondary)),
+              textTheme.displayMedium!.copyWith(color: colorScheme.secondary),
+          textScaler: displayCharacterstics.textScaler),
     );
   }
 }
@@ -184,6 +183,7 @@ class _ClueScoreDisplayWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var questionState = context.watch<QuestionState>();
+    final displayCharacterstics = context.read<DisplayCharacterstics>();
     final score_text = switch (questionState.getDisplayState()) {
       QuestionDisplayState.EMPTY => "---",
       QuestionDisplayState.SHOW_CLUE1 => "${CLUE1_SCORES[columnIndex]} points",
@@ -192,23 +192,21 @@ class _ClueScoreDisplayWidget extends StatelessWidget {
 
     final theme = Theme.of(context);
     return Container(
-      margin: const EdgeInsets.all(12.0),
+      margin: displayCharacterstics.fullPadding / 2,
       decoration: ShapeDecoration(
         shape: StadiumBorder(),
         color: CLUE_COLORS[this.columnIndex].primary,
       ),
       alignment: Alignment.center,
-      child: AutoSizeText(score_text,
-          maxLines: 1,
-          minFontSize: theme.textTheme.headlineMedium?.fontSize ?? 12,
-          style: theme.textTheme.displayMedium?.copyWith(
-              fontWeight: FontWeight.bold, color: theme.colorScheme.onPrimary),
-          overflow: TextOverflow.ellipsis),
+      child: Text(
+        score_text,
+        style: theme.textTheme.displayMedium!.copyWith(
+            fontWeight: FontWeight.bold, color: theme.colorScheme.onPrimary),
+        textScaler: displayCharacterstics.textScaler,
+      ),
     );
   }
 }
-
-// const CLUE_DISPLAY_PADDING = 12.0;
 
 class ClueDisplayWidget extends StatefulWidget {
   const ClueDisplayWidget({super.key, required this.index});
@@ -287,24 +285,28 @@ class _ClueAnswerButtonWidgetState extends State<ClueAnswerButtonWidget> {
     final theme = Theme.of(context);
     final colorScheme = CLUE_COLORS[this.widget.index ~/ 5];
     final displayCharacterstics = context.read<DisplayCharacterstics>();
-    return FilledButton(
-      onPressed: () => setState(() {
-        answer_shown = true;
-      }),
-      child: AutoSizeText(clueData.prompt,
-          maxLines: 1,
-          textScaleFactor: displayCharacterstics.textScale,
-          minFontSize: theme.textTheme.headlineSmall?.fontSize ?? 12,
-          style: theme.textTheme.headlineLarge
-              ?.copyWith(color: colorScheme.onPrimaryContainer),
-          overflow: TextOverflow.visible),
-      style: FilledButton.styleFrom(
-          textStyle: theme.textTheme.headlineLarge
-              ?.copyWith(color: theme.colorScheme.onInverseSurface),
-          fixedSize: Size.square(this.widget.maxButtonSize),
-          backgroundColor: colorScheme.inversePrimary,
-          elevation: 2,
-          shape: const CircleBorder()),
+    return Container(
+      width: this.widget.maxButtonSize,
+      height: this.widget.maxButtonSize,
+      child: FilledButton(
+        onPressed: () => setState(() {
+          answer_shown = true;
+        }),
+        child: Text(
+          clueData.prompt,
+          style: theme.textTheme.headlineMedium!.copyWith(
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onPrimaryContainer),
+          textScaler: displayCharacterstics.textScaler,
+        ),
+        style: FilledButton.styleFrom(
+            textStyle: theme.textTheme.headlineMedium
+                ?.copyWith(color: theme.colorScheme.onInverseSurface),
+            backgroundColor: colorScheme.inversePrimary,
+            elevation: 2,
+            shape: const CircleBorder(),
+            padding: displayCharacterstics.fullPadding / 4),
+      ),
     );
   }
 
@@ -314,7 +316,9 @@ class _ClueAnswerButtonWidgetState extends State<ClueAnswerButtonWidget> {
     final colorScheme = CLUE_COLORS[this.widget.index ~/ 5];
     final displayCharacterstics = context.read<DisplayCharacterstics>();
     return Container(
-      padding: displayCharacterstics.fullPadding / 2,
+      padding: EdgeInsets.symmetric(
+          horizontal: displayCharacterstics.paddingRaw,
+          vertical: displayCharacterstics.paddingRaw / 2),
       width: this.widget.maxSize.width,
       height: this.widget.maxSize.height,
       alignment: Alignment.center,
@@ -323,11 +327,11 @@ class _ClueAnswerButtonWidgetState extends State<ClueAnswerButtonWidget> {
         color: colorScheme.primary,
         shadows: kElevationToShadow[4],
       ),
-      child: AutoSizeText(clueData.answer,
-          maxLines: 3,
-          minFontSize: theme.textTheme.headlineMedium?.fontSize ?? 12,
+      child: Text(clueData.answer,
+          maxLines: 1,
           style: theme.textTheme.displayMedium
               ?.copyWith(color: colorScheme.onPrimary),
+          textScaler: displayCharacterstics.textScaler,
           overflow: TextOverflow.ellipsis),
     );
   }
@@ -364,12 +368,12 @@ class ClueTextWidget extends StatelessWidget {
         child: AnimatedSwitcher(
           duration: Duration(milliseconds: 800),
           transitionBuilder: AnimatedSwitcherTransitions.slideBottom,
-          child: AutoSizeText(clue_text,
+          child: Text(clue_text,
               maxLines: 3,
               key: ValueKey((index, question_state.getDisplayState())),
-              minFontSize: theme.textTheme.headlineSmall?.fontSize ?? 12,
-              style: theme.textTheme.headlineLarge
+              style: theme.textTheme.headlineMedium
                   ?.copyWith(color: colorScheme.onPrimaryContainer),
+              textScaler: displayCharacterstics.compundedTextScaler(scale: 0.9),
               overflow: TextOverflow.ellipsis),
         ),
       ),

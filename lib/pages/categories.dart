@@ -1,4 +1,3 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:local_hero/local_hero.dart';
 import 'package:provider/provider.dart';
@@ -50,21 +49,24 @@ class CategoriesDisplayWidget extends StatelessWidget {
 
     return ChangeNotifierProvider.value(
       value: _CategoriesState(count: categoriesData.getCount()),
-      builder: DisplayCharacterstics.wrapped(
-        child: Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            toolbarHeight: kToolbarHeight * 2,
-            elevation: 4,
-            actions: [
-              _DataLoaderIcon(),
-              SizedBox.square(dimension: 36),
-              ScoreBoardMiniWidget(),
-            ],
-          ),
-          body: _CategoriesBoard(),
-        ),
+      builder: DisplayCharacterstics.wrapped(childBuilder: _buildSubtree),
+    );
+  }
+
+  Widget _buildSubtree(BuildContext context, _child) {
+    final displayCharacterstics = context.read<DisplayCharacterstics>();
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        toolbarHeight: displayCharacterstics.appBarHeight,
+        elevation: 4,
+        actions: [
+          _DataLoaderIcon(),
+          displayCharacterstics.fullSpacer,
+          ScoreBoardMiniWidget(),
+        ],
       ),
+      body: _CategoriesBoard(),
     );
   }
 }
@@ -227,9 +229,9 @@ class _CategoriesBoard extends StatelessWidget {
         Align(
           alignment: Alignment.center,
           heightFactor: 1,
-          child: AutoSizeText(
+          child: Text(
             sectionTitle,
-            textScaleFactor: 0.5 * displayCharacterstics.textScale,
+            textScaler: displayCharacterstics.textScaler,
             style: Theme.of(context).textTheme.headlineLarge?.apply(
                 heightDelta: 3.0,
                 fontWeightDelta: 300,
@@ -240,7 +242,6 @@ class _CategoriesBoard extends StatelessWidget {
           direction: Axis.horizontal,
           alignment: WrapAlignment.center,
           runAlignment: WrapAlignment.center,
-          // spacing: displayCharacterstics.paddingRaw / 4,
           runSpacing: displayCharacterstics.paddingRaw,
           children: widgetList,
         ),
@@ -284,10 +285,9 @@ class _CategoriesWidget extends StatelessWidget {
       child: FilledButton(
         child: Padding(
           padding: displayCharacterstics.fullPadding / 2,
-          child: AutoSizeText(titleString,
-              style: theme.textTheme.headlineLarge?.apply(
-                  fontSizeFactor: 0.75 * displayCharacterstics.textScale,
-                  color: textColor),
+          child: Text(titleString,
+              style: theme.textTheme.headlineLarge?.apply(color: textColor),
+              textScaler: displayCharacterstics.textScaler,
               textAlign: TextAlign.center),
         ),
         style: FilledButton.styleFrom(backgroundColor: buttonColor),

@@ -17,7 +17,7 @@ class DisplayCharacterstics {
     return DisplayCharacterstics._private(
       paddingRaw: 18 * horizontalScale,
       appBarHeight: kToolbarHeight * verticalScale,
-      textScale: verticalScale,
+      textScale: avgScale * 2 / 3,
       iconSize: 18 * verticalScale,
     );
   }
@@ -30,6 +30,7 @@ class DisplayCharacterstics {
   EdgeInsets get fullPadding => EdgeInsets.all(paddingRaw);
   SizedBox get fullSpacer => SizedBox.square(dimension: paddingRaw);
   SizedBox get halfSpacer => SizedBox.square(dimension: paddingRaw / 2);
+  SizedBox get quarterSpacer => SizedBox.square(dimension: paddingRaw / 4);
 
   TextScaler get textScaler => TextScaler.linear(textScale);
   TextScaler compundedTextScaler({double scale = 1}) => TextScaler.linear(textScale * scale);
