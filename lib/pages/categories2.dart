@@ -95,10 +95,10 @@ class _DataLoaderIconState extends State<_DataLoaderIcon> {
           } else if (snapshot.connectionState == ConnectionState.done) {
             return _buildIconButton(
               context,
-              child: Icon(Icons.refresh),
+              child: Icon(Icons.upload),
               onPressed: () => setState(() {
                 this.dataFuture = globalData
-                    .readJson(DefaultAssetBundle.of(context))
+                    .uploadJson()
                     .then((_) =>
                         Future.delayed(Duration(milliseconds: 1000), () {}));
               }),

@@ -96,10 +96,8 @@ class _DataLoaderIconState extends State<_DataLoaderIcon> {
               context,
               child: Icon(Icons.refresh),
               onPressed: () => setState(() {
-                this.dataFuture = globalData
-                    .readJson(DefaultAssetBundle.of(context))
-                    .then((_) =>
-                        Future.delayed(Duration(milliseconds: 1000), () {}));
+                this.dataFuture = globalData.uploadJson()
+                    .then((_) => Future.delayed(Duration(milliseconds: 500), () {}));
               }),
             );
           } else {

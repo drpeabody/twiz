@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -58,10 +59,17 @@ class GlobalScoreboard extends ChangeNotifier {
 class GlobalData extends ChangeNotifier {
   CategoriesData categories = CategoriesData.sample();
 
-  Future<void> readJson(AssetBundle rootBundle) async {
-    print("Loading data from 'assets/dataset.json'");
-    final String response = await rootBundle.loadString('dataset.json');
-    final jsonData = await json.decode(response);
+  Future<void> uploadJson() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ["json"],
+    );
+    if (result == null) {
+      return;
+    }
+    
+    final fileContents = utf8.decode(await result.files.first.bytes!);
+    final jsonData = await json.decode(fileContents);
     categories = CategoriesData.fromJson(jsonData);
     notifyListeners();
   }
