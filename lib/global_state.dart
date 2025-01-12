@@ -67,6 +67,20 @@ class GlobalData extends ChangeNotifier {
   }
 }
 
+enum CategoryStatus {
+  HIDDEN,
+  REVEALED,
+  EXHAUSTED,
+}
+
+final List<MaterialColor> _CATEGORY_COLORS = [
+  Colors.blue,
+  Colors.cyan,
+  Colors.lime,
+  Colors.orange,
+  Colors.purple,
+];
+
 @immutable
 class CategoriesData {
   CategoriesData._private(this.categories);
@@ -105,6 +119,10 @@ class CategoriesData {
     return categories.length;
   }
 
+  int getMaxRowCount() {
+    return (getCount() + 1) ~/ 2;
+  }
+
   String getCategoryName(int index, {hidden = false}) {
     final config = this.categories[index];
     if (hidden) {
@@ -116,6 +134,15 @@ class CategoriesData {
 
   QuestionData getCategoryQuestion(int index) {
     return this.categories[index].$2;
+  }
+
+  Color getColorForStatus(int index, CategoryStatus status) {
+    final materialColor = _CATEGORY_COLORS[index % getMaxRowCount()];
+    return switch (status) {
+      CategoryStatus.HIDDEN => materialColor[200]!,
+      CategoryStatus.REVEALED => materialColor[400]!,
+      CategoryStatus.EXHAUSTED => Colors.grey[400]!,
+    };
   }
 }
 

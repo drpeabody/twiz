@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:twiz/global_state.dart';
 
 import 'pages/question.dart';
-import 'pages/categories.dart';
+import 'pages/categories2.dart';
 
 void main() {
   runApp(const GameApp());
@@ -28,14 +28,14 @@ class GameApp extends StatelessWidget {
               dynamicSchemeVariant: DynamicSchemeVariant.vibrant),
         ),
         routes: {
-          CategoriesDisplayWidget.route: (context) =>
+          CategoriesDisplayWidget2.route: (context) =>
               ProxyProvider<GlobalData, CategoriesData>(
                   update: (_, globalData, _prevCategoriesData) =>
                       globalData.categories,
-                  child: CategoriesDisplayWidget()),
+                  child: CategoriesDisplayWidget2()),
           QuestionDisplayWidget.route: (context) => QuestionDisplayWidget(),
         },
-        initialRoute: CategoriesDisplayWidget.route,
+        initialRoute: CategoriesDisplayWidget2.route,
       ),
     );
   }
