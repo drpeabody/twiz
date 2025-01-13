@@ -152,19 +152,29 @@ class __TeamIndexCounterState extends State<_TeamIndexCounter> {
                     )
                 ),
                 Text("and the Team Name"),
-                // TextField(
-                //     decoration: const InputDecoration(
-                //         border: UnderlineInputBorder(),
-                //         labelText: 'Enter a Teamname',
-                //     ),
-                    // validator: (String? value) {
-                    //     for(int i = 0; i < ScoreboardLength; i++) {
-                    //         if(scoreboardState.getTeamName(i) == value) 
-                    //             return "Name is already Taken";
+                Material( child: TextFormField(
+                    decoration: const InputDecoration(hintText: 'Name'),
+                    // validator: (value) {
+                    //     if (value == '') {
+                    //         return '*Required';
+                    //     }
+                    //     print(value?.toString());
+                    //     for(int i = 0 ; i < ScoreboardLength; i++) {
+                    //         print(scoreboardState.getTeamName(i));
+                    //         if(scoreboardState.getTeamName(i) == value) {
+                    //             return 'Name is already taken!';
+                    //         }
                     //     }
                     //     return null;
                     // },
-                // ),
+                    onChanged: (value) {
+                        setState(() {
+                            if (value != '') {
+                                _currentTeamName = value;
+                            }
+                        });
+                    }
+                )),
                 Text("for the team at position "),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -210,6 +220,7 @@ class __TeamIndexCounterState extends State<_TeamIndexCounter> {
                     onPressed: () {
                         if(_index < ScoreboardLength && _index > -1) {
                             scoreboardState.updateColor(currentColor, _index);
+                            scoreboardState.updateName(_currentTeamName, _index);
                         }
                     },
                     icon: Icon(Icons.keyboard_return),
