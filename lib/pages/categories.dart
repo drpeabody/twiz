@@ -1,38 +1,31 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:local_hero/local_hero.dart';
 import 'package:provider/provider.dart';
 
-import 'display.dart';
-import 'global_state.dart';
+import '../display.dart';
+import '../global_state.dart';
 import 'question.dart';
-import 'widgets/scoreboard_mini.dart';
-
-enum _CategoryStatus {
-  HIDDEN,
-  REVEALED,
-  EXHAUSTED,
-}
+import '../widgets/scoreboard_mini.dart';
 
 class _CategoriesState extends ChangeNotifier {
   _CategoriesState({required int count})
-      : categoriesList = List.filled(count, _CategoryStatus.HIDDEN);
+      : categoriesList = List.filled(count, CategoryStatus.HIDDEN);
 
-  final List<_CategoryStatus> categoriesList;
+  final List<CategoryStatus> categoriesList;
 
-  _CategoryStatus? getCategoryStatus(int index) {
+  CategoryStatus? getCategoryStatus(int index) {
     return categoriesList[index];
   }
 
-  _CategoryStatus doStatusUpdate(int index) {
-    if (categoriesList[index] == _CategoryStatus.EXHAUSTED) {
-      return _CategoryStatus.EXHAUSTED;
+  CategoryStatus doStatusUpdate(int index) {
+    if (categoriesList[index] == CategoryStatus.EXHAUSTED) {
+      return CategoryStatus.EXHAUSTED;
     }
 
     var newStatus = switch (categoriesList[index]) {
-      _CategoryStatus.HIDDEN => _CategoryStatus.REVEALED,
-      _CategoryStatus.REVEALED => _CategoryStatus.EXHAUSTED,
-      _CategoryStatus.EXHAUSTED => _CategoryStatus.EXHAUSTED,
+      CategoryStatus.HIDDEN => CategoryStatus.REVEALED,
+      CategoryStatus.REVEALED => CategoryStatus.EXHAUSTED,
+      CategoryStatus.EXHAUSTED => CategoryStatus.EXHAUSTED,
     };
     categoriesList[index] = newStatus;
     notifyListeners();
@@ -50,21 +43,24 @@ class CategoriesDisplayWidget extends StatelessWidget {
 
     return ChangeNotifierProvider.value(
       value: _CategoriesState(count: categoriesData.getCount()),
-      builder: DisplayCharacterstics.wrapped(
-        child: Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            toolbarHeight: kToolbarHeight * 2,
-            elevation: 4,
-            actions: [
-              _DataLoaderIcon(),
-              SizedBox.square(dimension: 36),
-              ScoreBoardMiniWidget(),
-            ],
-          ),
-          body: _CategoriesBoard(),
-        ),
+      builder: DisplayCharacterstics.wrapped(childBuilder: _buildSubtree),
+    );
+  }
+
+  Widget _buildSubtree(BuildContext context, _child) {
+    final displayCharacterstics = context.read<DisplayCharacterstics>();
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        toolbarHeight: displayCharacterstics.appBarHeight,
+        elevation: 4,
+        actions: [
+          _DataLoaderIcon(),
+          displayCharacterstics.fullSpacer,
+          ScoreBoardMiniWidget(),
+        ],
       ),
+      body: _CategoriesBoard(),
     );
   }
 }
@@ -100,10 +96,8 @@ class _DataLoaderIconState extends State<_DataLoaderIcon> {
               context,
               child: Icon(Icons.refresh),
               onPressed: () => setState(() {
-                this.dataFuture = globalData
-                    .readJson(DefaultAssetBundle.of(context))
-                    .then((_) =>
-                        Future.delayed(Duration(milliseconds: 1000), () {}));
+                this.dataFuture = globalData.uploadJson()
+                    .then((_) => Future.delayed(Duration(milliseconds: 500), () {}));
               }),
             );
           } else {
@@ -146,9 +140,9 @@ class _CategoriesBoard extends StatelessWidget {
     for (final (index, status) in categoriesState.categoriesList.indexed) {
       final categoryName = categoriesData.getCategoryName(index);
       final statusList = switch (status) {
-        _CategoryStatus.HIDDEN => hiddenCategoriesList,
-        _CategoryStatus.REVEALED => revealedCategoriesList,
-        _CategoryStatus.EXHAUSTED => exhaustedCategoriesList,
+        CategoryStatus.HIDDEN => hiddenCategoriesList,
+        CategoryStatus.REVEALED => revealedCategoriesList,
+        CategoryStatus.EXHAUSTED => exhaustedCategoriesList,
       };
       statusList.add(
         Align(
@@ -227,9 +221,9 @@ class _CategoriesBoard extends StatelessWidget {
         Align(
           alignment: Alignment.center,
           heightFactor: 1,
-          child: AutoSizeText(
+          child: Text(
             sectionTitle,
-            textScaleFactor: 0.5 * displayCharacterstics.textScale,
+            textScaler: displayCharacterstics.textScaler,
             style: Theme.of(context).textTheme.headlineLarge?.apply(
                 heightDelta: 3.0,
                 fontWeightDelta: 300,
@@ -240,7 +234,6 @@ class _CategoriesBoard extends StatelessWidget {
           direction: Axis.horizontal,
           alignment: WrapAlignment.center,
           runAlignment: WrapAlignment.center,
-          // spacing: displayCharacterstics.paddingRaw / 4,
           runSpacing: displayCharacterstics.paddingRaw,
           children: widgetList,
         ),
@@ -262,19 +255,19 @@ class _CategoriesWidget extends StatelessWidget {
     final categoryStatus = state.getCategoryStatus(index);
     final titleString = context.read<CategoriesData>().getCategoryName(
         this.index,
-        hidden: categoryStatus == _CategoryStatus.HIDDEN);
+        hidden: categoryStatus == CategoryStatus.HIDDEN);
 
     final theme = Theme.of(context);
     final (textColor, buttonColor) = switch (categoryStatus!) {
-      _CategoryStatus.HIDDEN => (
+      CategoryStatus.HIDDEN => (
           theme.colorScheme.onSecondary,
           theme.colorScheme.secondary
         ),
-      _CategoryStatus.REVEALED => (
+      CategoryStatus.REVEALED => (
           theme.colorScheme.onPrimary,
           theme.colorScheme.primary
         ),
-      _CategoryStatus.EXHAUSTED => (theme.colorScheme.surface, null),
+      CategoryStatus.EXHAUSTED => (theme.colorScheme.surface, null),
     };
     final displayCharacterstics = context.read<DisplayCharacterstics>();
 
@@ -284,14 +277,13 @@ class _CategoriesWidget extends StatelessWidget {
       child: FilledButton(
         child: Padding(
           padding: displayCharacterstics.fullPadding / 2,
-          child: AutoSizeText(titleString,
-              style: theme.textTheme.headlineLarge?.apply(
-                  fontSizeFactor: 0.75 * displayCharacterstics.textScale,
-                  color: textColor),
+          child: Text(titleString,
+              style: theme.textTheme.headlineLarge?.apply(color: textColor),
+              textScaler: displayCharacterstics.textScaler,
               textAlign: TextAlign.center),
         ),
         style: FilledButton.styleFrom(backgroundColor: buttonColor),
-        onPressed: categoryStatus == _CategoryStatus.EXHAUSTED
+        onPressed: categoryStatus == CategoryStatus.EXHAUSTED
             ? null
             : () => _onPressed(context, state),
       ),
@@ -300,7 +292,7 @@ class _CategoriesWidget extends StatelessWidget {
 
   void _onPressed(BuildContext context, _CategoriesState state) {
     final newStatus = state.doStatusUpdate(this.index);
-    if (newStatus == _CategoryStatus.EXHAUSTED) {
+    if (newStatus == CategoryStatus.EXHAUSTED) {
       final navigator = Navigator.of(context);
       final questionData =
           context.read<CategoriesData>().getCategoryQuestion(this.index);

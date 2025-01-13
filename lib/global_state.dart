@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -58,14 +59,35 @@ class GlobalScoreboard extends ChangeNotifier {
 class GlobalData extends ChangeNotifier {
   CategoriesData categories = CategoriesData.sample();
 
-  Future<void> readJson(AssetBundle rootBundle) async {
-    print("Loading data from 'assets/dataset.json'");
-    final String response = await rootBundle.loadString('dataset.json');
-    final jsonData = await json.decode(response);
+  Future<void> uploadJson() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ["json"],
+    );
+    if (result == null) {
+      return;
+    }
+    
+    final fileContents = utf8.decode(await result.files.first.bytes!);
+    final jsonData = await json.decode(fileContents);
     categories = CategoriesData.fromJson(jsonData);
     notifyListeners();
   }
 }
+
+enum CategoryStatus {
+  HIDDEN,
+  REVEALED,
+  EXHAUSTED,
+}
+
+final List<MaterialColor> _CATEGORY_COLORS = [
+  Colors.blue,
+  Colors.cyan,
+  Colors.lime,
+  Colors.orange,
+  Colors.purple,
+];
 
 @immutable
 class CategoriesData {
@@ -105,6 +127,10 @@ class CategoriesData {
     return categories.length;
   }
 
+  int getMaxRowCount() {
+    return (getCount() + 1) ~/ 2;
+  }
+
   String getCategoryName(int index, {hidden = false}) {
     final config = this.categories[index];
     if (hidden) {
@@ -116,6 +142,15 @@ class CategoriesData {
 
   QuestionData getCategoryQuestion(int index) {
     return this.categories[index].$2;
+  }
+
+  Color getColorForStatus(int index, CategoryStatus status) {
+    final materialColor = _CATEGORY_COLORS[index % getMaxRowCount()];
+    return switch (status) {
+      CategoryStatus.HIDDEN => materialColor[200]!,
+      CategoryStatus.REVEALED => materialColor[400]!,
+      CategoryStatus.EXHAUSTED => Colors.grey[400]!,
+    };
   }
 }
 
@@ -152,7 +187,7 @@ class ClueData {
   const ClueData(this.prompt, this.hint1, this.hint2, this.answer);
 
   const ClueData.sample(idx)
-      : prompt = "${idx}",
+      : prompt = "10${idx}",
         hint1 = "Clue ${idx} Hint 1: ${SampleHint}",
         hint2 = "Clue ${idx} Hint 2: ${SampleHint}",
         answer = "This is the answer ${idx}";

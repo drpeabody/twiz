@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:twiz/global_state.dart';
 
-import 'question.dart';
-import 'categories.dart';
+import 'pages/question.dart';
+import 'pages/categories2.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const GameApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class GameApp extends StatelessWidget {
+  const GameApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -21,21 +21,21 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => GlobalData()),
       ],
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Twiz Flutter',
         theme: ThemeData.from(
           colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.blueGrey,
               dynamicSchemeVariant: DynamicSchemeVariant.vibrant),
         ),
         routes: {
-          CategoriesDisplayWidget.route: (context) =>
+          CategoriesDisplayWidget2.route: (context) =>
               ProxyProvider<GlobalData, CategoriesData>(
                   update: (_, globalData, _prevCategoriesData) =>
                       globalData.categories,
-                  child: CategoriesDisplayWidget()),
+                  child: CategoriesDisplayWidget2()),
           QuestionDisplayWidget.route: (context) => QuestionDisplayWidget(),
         },
-        initialRoute: CategoriesDisplayWidget.route,
+        initialRoute: CategoriesDisplayWidget2.route,
       ),
     );
   }

@@ -12,8 +12,8 @@ class ScoreBoardFullWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final displayCharacterstics = context.read<DisplayCharacterstics>();
     return Container(
-      width: 900 * displayCharacterstics.textScale,
-      height: 450 * displayCharacterstics.textScale,
+      width: 1400 * displayCharacterstics.textScale,
+      height: 800 * displayCharacterstics.textScale,
       padding: displayCharacterstics.fullPadding * 2,
       child: Wrap(
         direction: Axis.horizontal,
@@ -21,13 +21,7 @@ class ScoreBoardFullWidget extends StatelessWidget {
         runAlignment: WrapAlignment.center,
         spacing: displayCharacterstics.paddingRaw * 2,
         runSpacing: displayCharacterstics.paddingRaw * 2,
-        children: [
-          _buildScoreCounter(context, 0),
-          _buildScoreCounter(context, 1),
-          _buildScoreCounter(context, 2),
-          _buildScoreCounter(context, 3),
-          _buildScoreCounter(context, 4),
-        ],
+        children: List.generate(ScoreboardLength, (idx) => _buildScoreCounter(context, idx)),
       ),
     );
   }
@@ -83,9 +77,9 @@ class _ScoreCounterSizes {
   final Axis direction;
 
   double get height =>
-      direction == Axis.horizontal ? scale * 100.0 : scale * 250.0;
+      scale * (direction == Axis.horizontal ? 100.0 : 250.0);
   double get width =>
-      direction == Axis.horizontal ? scale * 250.0 : scale * 100.0;
+      scale * (direction == Axis.horizontal ? 250.0 : 100.0);
   Size get size => Size(width, height);
 
   double get tweenEndOffset => scale * 2.5;
@@ -116,7 +110,7 @@ class _ScoreCounterState extends State<_ScoreCounter>
     _value = widget.initialValue;
     final scale = context.read<DisplayCharacterstics>().textScale;
     _sizes =
-        _ScoreCounterSizes(direction: widget.direction, scale: 0.75 * scale);
+        _ScoreCounterSizes(direction: widget.direction, scale: 1.25 * scale);
 
     if (widget.direction == Axis.horizontal) {
       _inOffsetTween =
