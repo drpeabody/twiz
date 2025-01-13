@@ -92,110 +92,53 @@ class __TeamIndexCounterState extends State<_TeamIndexCounter> {
     Widget build(BuildContext context) {
 
         final displayCharacterstics = context.read<DisplayCharacterstics>();
-        // final buttonCounter = CounterScreen();
 
         return Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-                // buttonCounter,
-                // TextField(
-                //     decoration: InputDecoration(
-                //         border: OutlineInputBorder(),
-                //         hintText: 'Enter a search term',
-                //     ),
-                // ),
-                AnimatedOpacity(
-                    opacity: _index != 0 ? 1.0 : 0.0,
-                    duration: Duration(milliseconds: 500),
-                    child: Text(
-                        '$_index',
-                        style: TextStyle(
-                            fontSize: 48.0,
-                            color: Colors.white,
+                Text("Press the Button to apply"),
+                Text("Red"),
+                Text("For the Team Name"),
+                Text("Clowns"),
+                Text("at position "),
+                Row( 
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                        IconButton.filledTonal(
+                            onPressed: () {
+                                setState(() {
+                                _index--;
+                                });
+                            },
+                            icon: Icon(Icons.flourescent),
+                            iconSize: displayCharacterstics.iconSize,
+                            padding: displayCharacterstics.fullPadding / 2,
                         ),
-                    ),
-                ),
-                IconButton.filledTonal(
-                    onPressed: () {
-                        setState(() {
-                        _index++;
-                        });
-                    },
-                    icon: Icon(Icons.settings),
-                    iconSize: displayCharacterstics.iconSize,
-                    padding: displayCharacterstics.fullPadding / 2,
-                ),
-                IconButton.filledTonal(
-                    onPressed: () {
-                        setState(() {
-                        _index--;
-                        });
-                    },
-                    icon: Icon(Icons.settings),
-                    iconSize: displayCharacterstics.iconSize,
-                    padding: displayCharacterstics.fullPadding / 2,
-                ),
+                        AnimatedOpacity(
+                            opacity: _index != 0 ? 1.0 : 0.0,
+                            duration: Duration(milliseconds: 500),
+                            child: Text(
+                                '$_index',
+                                style: TextStyle(
+                                    fontSize: 48.0,
+                                    color: Colors.white,
+                                ),
+                            ),
+                        ),
+                        IconButton.filledTonal(
+                            onPressed: () {
+                                setState(() {
+                                _index++;
+                                });
+                            },
+                            icon: Icon(Icons.add),
+                            iconSize: displayCharacterstics.iconSize,
+                            padding: displayCharacterstics.fullPadding / 2,
+                        ),
+                    ]
+                )
             ],
         );
     }
 }
 
-
-// Copied code
-
-
-// class CounterScreen extends StatefulWidget {
-//   @override
-//   _CounterScreenState createState() => _CounterScreenState();
-// }
-
-// class _CounterScreenState extends State<CounterScreen> {
-//   int _counter = 0;
-
-//   void _incrementCounter() {
-//     setState(() {
-//       _counter++;
-//     });
-//   }
-
-//   void _decrementCounter() {
-//     setState(() {
-//       _counter--;
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: Colors.purple,
-//       appBar: AppBar(
-//         title: Text('Aesthetic Counter'),
-//         backgroundColor: Colors.blue,
-//       ),
-//       body: Center(
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             SizedBox(height: 20.0),
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.center,
-//               children: [
-//                 FloatingActionButton(
-//                   onPressed: _decrementCounter,
-//                   backgroundColor: Colors.blue,
-//                   child: Icon(Icons.remove),
-//                 ),
-//                 SizedBox(width: 20.0),
-//                 FloatingActionButton(
-//                   onPressed: _incrementCounter,
-//                   backgroundColor: Colors.purple,
-//                   child: Icon(Icons.add),
-//                 ),
-//               ],
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
