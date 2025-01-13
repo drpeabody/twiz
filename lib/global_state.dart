@@ -57,10 +57,12 @@ class GlobalScoreboard extends ChangeNotifier {
 
   void updateColor(Color newColor, int index) {
     this._colors[index] = _deriveColorScheme(newColor);
+    notifyListeners();
   }
 
   void updateName(String name, int index) {
     this._names[index] = name;
+    notifyListeners();
   }
 }
 

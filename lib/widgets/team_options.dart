@@ -62,13 +62,7 @@ mixin TeamOptionsPopopWidgetProvider on StatelessWidget {
 
 class _TeamIndexCounter extends StatefulWidget {
 
-    const _TeamIndexCounter({
-        super.key,
-        this.currentIndex = 1,
-    });
-
-    // Index of the Team in the Global Score Board which gets modified
-    final int currentIndex;
+    const _TeamIndexCounter({ super.key });
 
     @override
     __TeamIndexCounterState createState() => __TeamIndexCounterState();
@@ -78,13 +72,15 @@ class _TeamIndexCounter extends StatefulWidget {
 class __TeamIndexCounterState extends State<_TeamIndexCounter> {
 
     late String currentName;
+    // Index of the Team in the Global Score Board which gets modified
     late int _index;
-    // late Color currentColor;
+    late Color _currentColor;
 
     @override
     void initState() {
         super.initState();
-        _index = widget.currentIndex;
+        _index = 1;
+        _currentColor = Colors.red;
     }
 
 
@@ -92,6 +88,7 @@ class __TeamIndexCounterState extends State<_TeamIndexCounter> {
     Widget build(BuildContext context) {
 
         final displayCharacterstics = context.read<DisplayCharacterstics>();
+        final scoreboardState = context.watch<GlobalScoreboard>();
 
         return Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -101,13 +98,15 @@ class __TeamIndexCounterState extends State<_TeamIndexCounter> {
                 Text("For the Team Name"),
                 Text("Clowns"),
                 Text("at position "),
-                Row( 
+                Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                         IconButton.filledTonal(
                             onPressed: () {
                                 setState(() {
-                                _index--;
+                                    if(_index > 0) {
+                                        _index--;
+                                    }
                                 });
                             },
                             icon: Icon(Icons.flourescent),
@@ -115,10 +114,10 @@ class __TeamIndexCounterState extends State<_TeamIndexCounter> {
                             padding: displayCharacterstics.fullPadding / 2,
                         ),
                         AnimatedOpacity(
-                            opacity: _index != 0 ? 1.0 : 0.0,
+                            opacity: (ScoreboardLength + _index) / (2.0 * ScoreboardLength),
                             duration: Duration(milliseconds: 500),
                             child: Text(
-                                '$_index',
+                                '${_index+1}',
                                 style: TextStyle(
                                     fontSize: 48.0,
                                     color: Colors.white,
@@ -128,7 +127,9 @@ class __TeamIndexCounterState extends State<_TeamIndexCounter> {
                         IconButton.filledTonal(
                             onPressed: () {
                                 setState(() {
-                                _index++;
+                                    if(_index < ScoreboardLength - 1) {
+                                        _index++;
+                                    }
                                 });
                             },
                             icon: Icon(Icons.add),
@@ -136,7 +137,17 @@ class __TeamIndexCounterState extends State<_TeamIndexCounter> {
                             padding: displayCharacterstics.fullPadding / 2,
                         ),
                     ]
-                )
+                ),
+                IconButton.filledTonal(
+                    onPressed: () {
+                        if(_index < ScoreboardLength && _index > -1) {
+                            scoreboardState.updateColor(_currentColor, _index);
+                        }
+                    },
+                    icon: Icon(Icons.keyboard_return),
+                    iconSize: displayCharacterstics.iconSize,
+                    padding: displayCharacterstics.fullPadding / 2,
+                ),
             ],
         );
     }
