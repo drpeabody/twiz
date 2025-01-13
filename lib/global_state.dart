@@ -54,6 +54,14 @@ class GlobalScoreboard extends ChangeNotifier {
   String getTeamName(int index) {
     return this._names[index];
   }
+
+  void updateColor(Color newColor, int index) {
+    this._colors[index] = _deriveColorScheme(newColor);
+  }
+
+  void updateName(String name, int index) {
+    this._names[index] = name;
+  }
 }
 
 class GlobalData extends ChangeNotifier {

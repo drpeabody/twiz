@@ -7,6 +7,7 @@ import 'package:twiz/global_state.dart';
 import '../display.dart';
 import 'question.dart';
 import '../widgets/scoreboard_mini.dart';
+import '../widgets/team_options.dart';
 
 class _CategoriesState extends ChangeNotifier {
   _CategoriesState({required int count})
@@ -35,7 +36,7 @@ class _CategoriesState extends ChangeNotifier {
   }
 }
 
-class CategoriesDisplayWidget2 extends StatelessWidget {
+class CategoriesDisplayWidget2 extends StatelessWidget  with TeamOptionsPopopWidgetProvider {
   static const route = "/categories";
 
   @override
@@ -50,12 +51,25 @@ class CategoriesDisplayWidget2 extends StatelessWidget {
 
   Widget _buildSubtree(BuildContext context, _child) {
     final displayCharacterstics = context.read<DisplayCharacterstics>();
+    final scoreboardState = context.watch<GlobalScoreboard>();
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         toolbarHeight: displayCharacterstics.appBarHeight,
         elevation: 4,
         actions: [
+          IconButton.filledTonal(
+            onPressed: () => showDialog<String>(
+                context: context,
+                builder: (context) => provideUsing(
+                    context, scoreboardState, displayCharacterstics),
+            ),
+            icon: Icon(Icons.settings),
+            iconSize: displayCharacterstics.iconSize,
+            padding: displayCharacterstics.fullPadding / 2,
+          ),
+          displayCharacterstics.fullSpacer,
           _DataLoaderIcon(),
           displayCharacterstics.fullSpacer,
           ScoreBoardMiniWidget(),
