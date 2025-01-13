@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import '../display.dart';
 import '../global_state.dart';
@@ -74,13 +75,21 @@ class __TeamIndexCounterState extends State<_TeamIndexCounter> {
     late String currentName;
     // Index of the Team in the Global Score Board which gets modified
     late int _index;
-    late Color _currentColor;
+    late String _currentTeamName;
+
+    Color pickerColor = Color(0xff443a49);
+    Color currentColor = Color(0xff443a49);
+
+    // ValueChanged<Color> callback
+    void changeColor(Color color) {
+        setState(() => pickerColor = color);
+    }
 
     @override
     void initState() {
         super.initState();
         _index = 1;
-        _currentColor = Colors.red;
+        _currentTeamName = "";
     }
 
 
@@ -94,10 +103,69 @@ class __TeamIndexCounterState extends State<_TeamIndexCounter> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
                 Text("Press the Button to apply"),
-                Text("Red"),
-                Text("For the Team Name"),
-                Text("Clowns"),
-                Text("at position "),
+                ElevatedButton(
+                    child: Text("this color"),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: pickerColor
+                    ),
+                    onPressed: () => showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                            return AlertDialog(
+                                title: const Text('Pick a color!'),
+                                content: SingleChildScrollView(
+                                child: ColorPicker(
+                                    pickerColor: pickerColor,
+                                    onColorChanged: changeColor,
+                                ),
+                                // Use Material color picker:
+                                //
+                                // child: MaterialPicker(
+                                //   pickerColor: pickerColor,
+                                //   onColorChanged: changeColor,
+                                //   showLabel: true, // only on portrait mode
+                                // ),
+                                //
+                                // Use Block color picker:
+                                //
+                                // child: BlockPicker(
+                                //   pickerColor: currentColor,
+                                //   onColorChanged: changeColor,
+                                // ),
+                                //
+                                // child: MultipleChoiceBlockPicker(
+                                //   pickerColors: currentColors,
+                                //   onColorsChanged: changeColors,
+                                // ),
+                                ),
+                                actions: <Widget>[
+                                    ElevatedButton(
+                                        child: const Text('Got it'),
+                                        onPressed: () {
+                                            setState(() => currentColor = pickerColor);
+                                            Navigator.of(context).pop();
+                                        },
+                                    ),
+                                ],
+                            );
+                        }
+                    )
+                ),
+                Text("and the Team Name"),
+                // TextField(
+                //     decoration: const InputDecoration(
+                //         border: UnderlineInputBorder(),
+                //         labelText: 'Enter a Teamname',
+                //     ),
+                    // validator: (String? value) {
+                    //     for(int i = 0; i < ScoreboardLength; i++) {
+                    //         if(scoreboardState.getTeamName(i) == value) 
+                    //             return "Name is already Taken";
+                    //     }
+                    //     return null;
+                    // },
+                // ),
+                Text("for the team at position "),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -141,7 +209,7 @@ class __TeamIndexCounterState extends State<_TeamIndexCounter> {
                 IconButton.filledTonal(
                     onPressed: () {
                         if(_index < ScoreboardLength && _index > -1) {
-                            scoreboardState.updateColor(_currentColor, _index);
+                            scoreboardState.updateColor(currentColor, _index);
                         }
                     },
                     icon: Icon(Icons.keyboard_return),
